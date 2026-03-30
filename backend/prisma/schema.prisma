@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model LojaCadastro {
+  id            Int       @id @default(autoincrement())
+  cnpj          String    @db.VarChar(14)
+  loja_numero   Int?
+  nome_fantasia String    @db.VarChar(255)
+  razao_social  String    @db.VarChar(255)
+  email         String    @unique @db.VarChar(255)
+  senha_hash    String    @db.VarChar(255)
+  telefone      String?   @db.VarChar(20)
+  whatsapp      String?   @db.VarChar(20)
+  instagram     String?   @db.VarChar(100)
+
+  // Endereço separado por campo
+  end_rua         String?  @db.VarChar(255)
+  end_numero      String?  @db.VarChar(20)
+  end_bairro      String?  @db.VarChar(100)
+  end_cidade      String?  @db.VarChar(100)
+  end_uf          String?  @db.VarChar(2)
+  end_cep         String?  @db.VarChar(9)
+  end_complemento String?  @db.VarChar(100)
+
+  // Horário de funcionamento por dia da semana (Abertura/Fechamento)
+  seg_abre  String?  @db.VarChar(5)
+  seg_fecha String?  @db.VarChar(5)
+  ter_abre  String?  @db.VarChar(5)
+  ter_fecha String?  @db.VarChar(5)
+  qua_abre  String?  @db.VarChar(5)
+  qua_fecha String?  @db.VarChar(5)
+  qui_abre  String?  @db.VarChar(5)
+  qui_fecha String?  @db.VarChar(5)
+  sex_abre  String?  @db.VarChar(5)
+  sex_fecha String?  @db.VarChar(5)
+  sab_abre  String?  @db.VarChar(5)
+  sab_fecha String?  @db.VarChar(5)
+  dom_abre  String?  @db.VarChar(5)
+  dom_fecha String?  @db.VarChar(5)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  balconistas LojaBalconista[]
+  servicos    LojaServicos[]
+
+  @@map("fat_loja_cadastro")
+}
+
+model LojaBalconista {
+  id           Int      @id @default(autoincrement())
+  loja_id      Int
+  cnpj         String   @db.VarChar(14)
+  loja_numero  Int?
+  nome_fantasia String  @db.VarChar(255)
+  nome         String   @db.VarChar(255)
+  cpf          String?  @db.VarChar(11)
+  email        String?  @db.VarChar(255)
+  telefone     String?  @db.VarChar(20)
+  ativo        Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  loja         LojaCadastro @relation(fields: [loja_id], references: [id])
+
+  @@map("fat_loja_balconista")
+}
+
+model LojaServicos {
+  id           Int      @id @default(autoincrement())
+  loja_id      Int
+  cnpj         String   @db.VarChar(14)
+  loja_numero  Int?
+  nome_fantasia String  @db.VarChar(255)
+  nome_servico String   @db.VarChar(255)
+  descricao    String?  @db.Text
+  ativo        Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  loja         LojaCadastro @relation(fields: [loja_id], references: [id])
+
+  @@map("fat_loja_servicos")
+}
