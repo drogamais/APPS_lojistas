@@ -18,8 +18,22 @@ export function AuthProvider({ children }) {
     navigate('/login', { replace: true })
   }, [navigate])
 
+  let isAdmin = false;
+  let userDetails = null;
+
+  if (token) {
+    try {
+      const payloadBase64 = token.split('.')[1]
+      const decodedPayload = JSON.parse(atob(payloadBase64))
+      isAdmin = !!decodedPayload.is_admin
+      userDetails = decodedPayload
+    } catch(e) {
+      console.error('Erro ao decodificar token JWT', e)
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider value={{ token, login, logout, isAdmin, userDetails }}>
       {children}
     </AuthContext.Provider>
   )

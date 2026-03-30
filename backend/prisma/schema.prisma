@@ -15,6 +15,7 @@ model LojaCadastro {
   razao_social  String    @db.VarChar(255)
   email         String    @unique @db.VarChar(255)
   senha_hash    String    @db.VarChar(255)
+  is_admin      Boolean   @default(false)
   telefone      String?   @db.VarChar(20)
   whatsapp      String?   @db.VarChar(20)
   instagram     String?   @db.VarChar(100)
@@ -90,4 +91,29 @@ model LojaServicos {
   loja         LojaCadastro @relation(fields: [loja_id], references: [id])
 
   @@map("fat_loja_servicos")
+}
+
+model LojaHomeLink {
+  id          Int      @id @default(autoincrement())
+  titulo      String   @db.VarChar(100)
+  url         String   @db.VarChar(500)
+  icone_nome  String?  @db.VarChar(50)
+  ordem       Int      @default(0)
+  ativo       Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("fat_home_links")
+}
+
+model LojaHomeAviso {
+  id                  Int      @id @default(autoincrement())
+  titulo              String   @db.VarChar(200)
+  descricao_ou_imagem String   @db.Text
+  ordem               Int      @default(0)
+  ativo               Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("fat_home_avisos")
 }

@@ -50,6 +50,7 @@ export async function authRoutes(fastify) {
         nome_fantasia: loja.nome_fantasia,
         cnpj: loja.cnpj,
         loja_numero: loja.loja_numero,
+        is_admin: loja.is_admin,
       },
       { expiresIn: '8h' },
     )
