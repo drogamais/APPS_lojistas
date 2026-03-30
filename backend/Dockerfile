@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y openssl --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY package.json ./
-RUN npm install --frozen-lockfile
+RUN npm install
 
 # ---- Stage 2: Runtime ----
 FROM node:20-slim AS runner

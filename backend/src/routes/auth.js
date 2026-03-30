@@ -30,6 +30,7 @@ export async function authRoutes(fastify) {
         cnpj: true,
         loja_numero: true,
         senha_hash: true,
+        is_admin: true,
       },
     })
 

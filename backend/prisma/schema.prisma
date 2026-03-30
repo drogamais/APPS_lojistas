@@ -117,3 +117,16 @@ model LojaHomeAviso {
 
   @@map("fat_home_avisos")
 }
+
+model LojaHomePromocao {
+  id          Int      @id @default(autoincrement())
+  titulo      String   @db.VarChar(200)
+  imagem_url  String   @db.VarChar(1000)
+  url_destino String?  @db.VarChar(500)
+  ordem       Int      @default(0)
+  ativo       Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("fat_home_promocoes")
+}
