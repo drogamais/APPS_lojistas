@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api.js'
-import { Clock, MapPin, Building2, Smartphone, Save } from 'lucide-react'
+import { Clock, MapPin, Building2, Smartphone, Save, Maximize, Car, Facebook } from 'lucide-react'
 
 const formatPhone = (val) => {
   if (!val) return '';
@@ -181,6 +181,9 @@ export default function PerfilPage() {
     const { name, value } = e.target;
     if (name === 'telefone' || name === 'whatsapp') {
       setForm({ ...form, [name]: formatPhone(value) });
+    } else if (name === 'area_loja' || name === 'vagas_estacionamento') {
+      const val = value === '' ? '' : Number(value);
+      setForm({ ...form, [name]: val });
     } else {
       setForm({ ...form, [name]: value });
     }
@@ -224,6 +227,18 @@ export default function PerfilPage() {
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Razão Social</label>
               <input type="text" name="razao_social" value={form.razao_social ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 focus:border-drogamais-400" />
             </div>
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                <Maximize size={12} className="text-slate-300" /> Área da Loja (m²)
+              </label>
+              <input type="number" name="area_loja" value={form.area_loja ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                <Car size={12} className="text-slate-300" /> Vagas Estacionamento
+              </label>
+              <input type="number" name="vagas_estacionamento" value={form.vagas_estacionamento ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+            </div>
           </div>
         </section>
 
@@ -245,6 +260,12 @@ export default function PerfilPage() {
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Instagram</label>
               <input type="text" name="instagram" placeholder="@drogamais" value={form.instagram ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                <Facebook size={12} className="text-slate-300" /> Facebook
+              </label>
+              <input type="text" name="facebook" placeholder="fb.com/..." value={form.facebook ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
           </div>
         </section>

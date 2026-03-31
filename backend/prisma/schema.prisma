@@ -19,6 +19,9 @@ model LojaCadastro {
   telefone      String?   @db.VarChar(20)
   whatsapp      String?   @db.VarChar(20)
   instagram     String?   @db.VarChar(100)
+  facebook      String?   @db.VarChar(100)
+  area_loja     Float?
+  vagas_estacionamento Int?
 
   // Endereço separado por campo
   end_rua         String?  @db.VarChar(255)
@@ -65,6 +68,10 @@ model LojaBalconista {
   cpf          String?  @db.VarChar(11)
   email        String?  @db.VarChar(255)
   telefone     String?  @db.VarChar(20)
+  sexo         String?  @db.VarChar(10)
+  idade        Int?
+  data_ingresso DateTime?
+  data_egresso  DateTime?
   ativo        Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -83,6 +90,7 @@ model LojaServicos {
   nome_fantasia String  @db.VarChar(255)
   nome_servico String   @db.VarChar(255)
   descricao    String?  @db.Text
+  horarios     Json?
   ativo        Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

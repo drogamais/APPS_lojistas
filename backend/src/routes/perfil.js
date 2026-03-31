@@ -8,6 +8,9 @@ const perfilUpdateSchema = z.object({
   telefone:             z.string().max(20).optional(),
   whatsapp:             z.string().max(20).optional(),
   instagram:            z.string().max(100).optional(),
+  facebook:             z.string().max(100).optional(),
+  area_loja:            z.number().optional(),
+  vagas_estacionamento: z.number().int().optional(),
 
   // Endereço
   end_rua:         z.string().max(255).optional(),
@@ -63,6 +66,9 @@ const SAFE_SELECT = {
   telefone:             true,
   whatsapp:             true,
   instagram:            true,
+  facebook:             true,
+  area_loja:            true,
+  vagas_estacionamento: true,
   end_rua:         true,
   end_numero:      true,
   end_bairro:      true,

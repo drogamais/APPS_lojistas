@@ -6,7 +6,11 @@ const balconistaSchema = z.object({
   cpf: z.string().length(11, 'CPF deve ter 11 dígitos.').optional(),
   email: z.string().email('E-mail inválido.').optional(),
   telefone: z.string().max(20).optional(),
-  ativo: z.boolean().optional(),
+  sexo: z.string().max(10).optional(),
+  idade: z.number().int().optional(),
+  data_ingresso: z.preprocess((arg) => (typeof arg === 'string' ? new Date(arg) : arg), z.date()).optional(),
+  data_egresso: z.preprocess((arg) => (typeof arg === 'string' ? new Date(arg) : arg), z.date()).nullable().optional(),
+  ativo: z.boolean().default(true).optional(),
 })
 
 const balconistaUpdateSchema = balconistaSchema.partial()
@@ -28,6 +32,10 @@ export async function balconistaRoutes(fastify) {
         cpf: true,
         email: true,
         telefone: true,
+        sexo: true,
+        idade: true,
+        data_ingresso: true,
+        data_egresso: true,
         ativo: true,
         createdAt: true,
       },

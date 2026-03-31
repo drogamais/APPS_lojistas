@@ -4,6 +4,7 @@ import { prisma } from '../lib/prisma.js'
 const servicoSchema = z.object({
   nome_servico: z.string().min(2, 'Nome do serviço obrigatório.'),
   descricao: z.string().optional(),
+  horarios: z.any().optional(),
   ativo: z.boolean().optional(),
 })
 
@@ -24,6 +25,7 @@ export async function servicoRoutes(fastify) {
         id: true,
         nome_servico: true,
         descricao: true,
+        horarios: true,
         ativo: true,
         createdAt: true,
       },
