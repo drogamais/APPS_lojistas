@@ -1,86 +1,189 @@
+// src/components/Layout.jsx
 import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
-import { Home, Store, Users, Wrench, Settings, LogOut, Menu, X } from 'lucide-react'
+import {
+  Home, Store, Users, Wrench, Settings, LogOut,
+  Menu, X, ChevronLeft, ChevronRight,
+} from 'lucide-react'
+import LogoDrogamais from '../assets/logo-login.svg'
+
+/* ─── larguras do sidebar ─── */
+const SIDEBAR_W_EXPANDED  = 'w-[240px]'
+const SIDEBAR_W_COLLAPSED = 'w-[68px]'
 
 export default function Layout() {
-  const { logout, isAdmin } = useAuth()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { logout, isAdmin, user } = useAuth()
+  const navigate = useNavigate()
 
-  const links = [
-    { to: '/home',        label: 'Home',           icon: Home },
-    { to: '/perfil',      label: 'Minha Loja',     icon: Store },
-    { to: '/balconistas', label: 'Balconistas',    icon: Users },
-    { to: '/servicos',    label: 'Serviços',       icon: Wrench },
+  /* mobile: drawer aberto/fechado */
+  const [mobileOpen, setMobileOpen] = useState(false)
+  /* desktop: sidebar expandida/colapsada */
+  const [collapsed, setCollapsed] = useState(false)
+
+  const navLinks = [
+    { to: '/home',        label: 'Home',        icon: Home },
+    { to: '/perfil',      label: 'Minha Loja',  icon: Store },
+    { to: '/balconistas', label: 'Balconistas',  icon: Users },
+    { to: '/servicos',    label: 'Serviços',     icon: Wrench },
   ]
-
   if (isAdmin) {
-    links.push({ to: '/admin/home', label: 'Admin. Home', icon: Settings })
+    navLinks.push({ to: '/admin/home', label: 'Admin', icon: Settings })
   }
 
-  return (
-    <div className="min-h-screen flex bg-gray-50">
-      
-      {/* Mobile Topbar & Hamburger */}
-      <div className="md:hidden fixed top-0 w-full bg-drogamais-500 text-white z-50 flex items-center justify-between px-4 py-3 shadow-md">
-        <span className="font-bold text-lg tracking-wide">Drogamais</span>
-        <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1 rounded-md bg-transparent hover:bg-drogamais-600 transition">
-          {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </div>
+  /* ── Sidebar compartilhado (desktop + mobile drawer) ── */
+  function SidebarContent({ onNavigate }) {
+    return (
+      <div className="flex flex-col h-full">
 
-      {/* Backdrop Mobile */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+        {/* ── Cabeçalho do sidebar ── */}
+        <div className="h-16 flex items-center px-4 border-b border-slate-100 shrink-0">
+          {/* Logo */}
+          <div
+            className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer"
+            onClick={() => { navigate('/home'); onNavigate?.() }}
+          >
+            <img
+              src={LogoDrogamais}
+              alt="Drogamais"
+              className="w-8 h-8 shrink-0"
+            />
+            {!collapsed && (
+              <span className="font-extrabold text-[15px] text-drogamais-500 tracking-tight truncate">
+                Drogamais
+              </span>
+            )}
+          </div>
 
-      {/* Sidebar */}
-      <aside 
-        className={`fixed md:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-200 z-50 transform transition-transform duration-300 flex flex-col ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-        }`}
-      >
-        <div className="h-16 flex items-center justify-center border-b border-gray-100 mt-12 md:mt-0">
-          <span className="font-bold text-xl text-drogamais-600 tracking-wide">Drogamais</span>
+          {/* Botão colapsar (só desktop) */}
+          <button
+            onClick={() => setCollapsed(c => !c)}
+            title={collapsed ? 'Expandir menu' : 'Colapsar menu'}
+            className="hidden md:flex items-center justify-center w-7 h-7 rounded-lg text-slate-400
+                       hover:text-drogamais-500 hover:bg-drogamais-50 transition-all shrink-0"
+          >
+            {collapsed
+              ? <ChevronRight size={16} strokeWidth={2.5} />
+              : <ChevronLeft  size={16} strokeWidth={2.5} />
+            }
+          </button>
         </div>
 
-        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-          {links.map(({ to, label, icon: Icon }) => (
+        {/* ── Links de navegação ── */}
+        <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5">
+          {navLinks.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
-              onClick={() => setSidebarOpen(false)}
+              onClick={() => onNavigate?.()}
+              title={collapsed ? label : undefined}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                  isActive
-                    ? 'bg-drogamais-50 text-drogamais-600'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-drogamais-500'
-                }`
+                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-medium
+                 transition-all duration-150 group relative
+                 ${isActive
+                   ? 'bg-drogamais-50 text-drogamais-600'
+                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                 }
+                 ${collapsed ? 'justify-center' : ''}`
               }
             >
-              <Icon size={18} className="shrink-0" />
-              {label}
+              {({ isActive }) => (
+                <>
+                  {/* indicador lateral ativo */}
+                  {isActive && (
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-drogamais-500 rounded-r-full" />
+                  )}
+                  <Icon
+                    size={18}
+                    strokeWidth={isActive ? 2.2 : 1.8}
+                    className="shrink-0"
+                  />
+                  {!collapsed && <span>{label}</span>}
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-gray-100">
+        {/* ── Rodapé: botão sair ── */}
+        <div className="p-2 border-t border-slate-100 shrink-0">
           <button
-            onClick={logout}
-            className="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-all"
+            onClick={() => { logout(); onNavigate?.() }}
+            title={collapsed ? 'Sair' : undefined}
+            className={`flex items-center gap-3 w-full px-3 py-2.5 text-[13.5px] font-medium
+                        text-slate-500 hover:bg-red-50 hover:text-drogamais-600 rounded-xl
+                        transition-all duration-150
+                        ${collapsed ? 'justify-center' : ''}`}
           >
-            <LogOut size={18} />
-            Sair
+            <LogOut size={18} strokeWidth={1.8} className="shrink-0" />
+            {!collapsed && <span>Sair</span>}
           </button>
         </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen flex bg-slate-50 font-sans">
+
+      {/* ════════════════════════════════
+          MOBILE: Topbar + Drawer
+      ════════════════════════════════ */}
+      {/* Topbar mobile */}
+      <div className="md:hidden fixed top-0 inset-x-0 h-14 bg-white border-b border-slate-100
+                      z-50 flex items-center justify-between px-4 shadow-sm">
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="p-1 rounded-lg text-slate-500 hover:bg-slate-100 transition"
+        >
+          <Menu size={22} />
+        </button>
+        <img src={LogoDrogamais} alt="Drogamais" className="w-7 h-7" />
+        <div className="w-8" /> {/* espaçador */}
+      </div>
+
+      {/* Backdrop mobile */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Drawer mobile */}
+      <aside
+        className={`fixed top-0 left-0 h-full bg-white z-50 shadow-2xl
+                    transition-transform duration-300 md:hidden
+                    ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+                    w-[240px]`}
+      >
+        <button
+          onClick={() => setMobileOpen(false)}
+          className="absolute top-3 right-3 p-1.5 rounded-lg text-slate-400
+                     hover:bg-slate-100 transition"
+        >
+          <X size={18} />
+        </button>
+        <SidebarContent onNavigate={() => setMobileOpen(false)} />
       </aside>
 
-      {/* Main Content Area */}
-      <main className="flex-1 min-w-0 pt-16 md:pt-0 p-4 md:p-8">
-        <div className="max-w-5xl mx-auto">
+      {/* ════════════════════════════════
+          DESKTOP: Sidebar fixa/sticky
+      ════════════════════════════════ */}
+      <aside
+        className={`hidden md:flex flex-col h-screen sticky top-0 bg-white
+                    border-r border-slate-100 shrink-0
+                    transition-all duration-250 ease-in-out
+                    ${collapsed ? SIDEBAR_W_COLLAPSED : SIDEBAR_W_EXPANDED}`}
+      >
+        <SidebarContent />
+      </aside>
+
+      {/* ════════════════════════════════
+          ÁREA DE CONTEÚDO PRINCIPAL
+      ════════════════════════════════ */}
+      <main className="flex-1 min-w-0 flex flex-col pt-14 md:pt-0">
+        <div className="flex-1 p-4 md:p-8 max-w-6xl w-full mx-auto">
           <Outlet />
         </div>
       </main>
