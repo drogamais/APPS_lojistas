@@ -36,7 +36,7 @@ function Switch({ checked, onChange }) {
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-drogamais-500 focus:ring-offset-2 ${
-        checked ? 'bg-drogamais-500' : 'bg-gray-200'
+        checked ? 'bg-drogamais-500' : 'bg-gray-200 dark:bg-slate-700'
       }`}
     >
       <span
@@ -76,9 +76,12 @@ export default function PerfilPage() {
 
       // Injeta os horários
       DIAS_SEMANA.forEach(({ prefix }) => {
-        initialForm[`${prefix}_abre`] = data[`${prefix}_abre`] ?? '';
-        initialForm[`${prefix}_fecha`] = data[`${prefix}_fecha`] ?? '';
-        initialForm[`is_${prefix}_aberto`] = !!(data[`${prefix}_abre`] && data[`${prefix}_fecha`]);
+        const abre = data[`${prefix}_abre`] ?? '';
+        const fecha = data[`${prefix}_fecha`] ?? '';
+        initialForm[`${prefix}_abre`] = abre;
+        initialForm[`${prefix}_fecha`] = fecha;
+        initialForm[`is_${prefix}_aberto`] = !!(abre && fecha);
+        initialForm[`is_${prefix}_24h`] = (abre === '00:00' && (fecha === '23:59' || fecha === '00:00'));
       });
 
       setForm(initialForm)
@@ -105,6 +108,17 @@ export default function PerfilPage() {
     }
 
     setForm(prev => ({ ...prev, [`${prefix}_${type}`]: newVal }));
+  }
+
+  function toggle24h(prefix) {
+    const isNow24h = !form[`is_${prefix}_24h`];
+    setForm(prev => ({
+      ...prev,
+      [`is_${prefix}_24h`]: isNow24h,
+      [`is_${prefix}_aberto`]: true, // Força estar aberto
+      [`${prefix}_abre`]: isNow24h ? '00:00' : (prev[`${prefix}_abre`] === '00:00' ? '' : prev[`${prefix}_abre`]),
+      [`${prefix}_fecha`]: isNow24h ? '23:59' : (prev[`${prefix}_fecha`] === '23:59' ? '' : prev[`${prefix}_fecha`]),
+    }));
   }
 
   async function handleSubmit(e) {
@@ -140,6 +154,7 @@ export default function PerfilPage() {
     // Limpa estado isolado (Variáveis de controle do front) e envia null para dias Fechados
     DIAS_SEMANA.forEach(({ prefix }) => {
       delete submitData[`is_${prefix}_aberto`];
+      delete submitData[`is_${prefix}_24h`];
       if (!form[`is_${prefix}_aberto`]) {
         submitData[`${prefix}_abre`] = null;
         submitData[`${prefix}_fecha`] = null;
@@ -171,15 +186,15 @@ export default function PerfilPage() {
     }
   };
 
-  if (loading) return <p className="text-gray-500 text-sm">A carregar perfil...</p>;
+  if (loading) return <p className="text-slate-500 dark:text-slate-400 text-sm animate-pulse">A carregar perfil...</p>;
 
   return (
-    <div className="max-w-4xl pb-10">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Perfil da Loja</h1>
-        <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
-          <Building2 size={16} /> 
-          CNPJ: <span className="font-mono">{perfil?.cnpj}</span>
+    <div className="max-w-3xl mx-auto pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="mb-8 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+        <h1 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">Perfil da Loja</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
+          <Building2 size={16} className="text-drogamais-500" /> 
+          CNPJ: <span className="font-mono font-bold">{perfil?.cnpj}</span>
           {perfil?.loja_numero && ` • Loja nº ${perfil.loja_numero}`}
         </p>
       </div>
@@ -195,138 +210,173 @@ export default function PerfilPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* INFORMAÇÕES BÁSICAS */}
-        <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center gap-2">
-            <Building2 className="text-gray-500" size={20} />
-            <h2 className="text-lg font-semibold text-gray-700">Informações Básicas</h2>
+        <section className="bg-white dark:bg-slate-900 rounded-[20px] shadow-[0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden">
+          <div className="bg-slate-50/50 dark:bg-slate-800/40 px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+            <Building2 className="text-slate-400 dark:text-slate-500" size={20} />
+            <h2 className="text-[15px] font-bold text-slate-700 dark:text-slate-200">Informações Básicas</h2>
           </div>
           <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Nome Fantasia</label>
-              <input type="text" name="nome_fantasia" value={form.nome_fantasia ?? ''} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-drogamais-500" />
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nome Fantasia</label>
+              <input type="text" name="nome_fantasia" value={form.nome_fantasia ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 focus:border-drogamais-400" />
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Razão Social</label>
-              <input type="text" name="razao_social" value={form.razao_social ?? ''} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-drogamais-500" />
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Razão Social</label>
+              <input type="text" name="razao_social" value={form.razao_social ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 focus:border-drogamais-400" />
             </div>
           </div>
         </section>
 
         {/* CONTATOS */}
-        <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center gap-2">
-            <Smartphone className="text-gray-500" size={20} />
-            <h2 className="text-lg font-semibold text-gray-700">Contactos da Loja</h2>
+        <section className="bg-white dark:bg-slate-900 rounded-[20px] shadow-[0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden">
+          <div className="bg-slate-50/50 dark:bg-slate-800/40 px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+            <Smartphone className="text-slate-400 dark:text-slate-500" size={20} />
+            <h2 className="text-[15px] font-bold text-slate-700 dark:text-slate-200">Contactos da Loja</h2>
           </div>
           <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Telefone</label>
-              <input type="text" name="telefone" placeholder="(XX) XXXXX-XXXX" value={form.telefone ?? ''} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-drogamais-500 font-mono" />
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Telefone</label>
+              <input type="text" name="telefone" placeholder="(XX) XXXXX-XXXX" value={form.telefone ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 font-mono" />
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">WhatsApp</label>
-              <input type="text" name="whatsapp" placeholder="(XX) XXXXX-XXXX" value={form.whatsapp ?? ''} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-drogamais-500 font-mono" />
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">WhatsApp</label>
+              <input type="text" name="whatsapp" placeholder="(XX) XXXXX-XXXX" value={form.whatsapp ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 font-mono" />
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Instagram</label>
-              <input type="text" name="instagram" placeholder="@drogamais" value={form.instagram ?? ''} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-drogamais-500" />
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Instagram</label>
+              <input type="text" name="instagram" placeholder="@drogamais" value={form.instagram ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
           </div>
         </section>
 
         {/* ENDEREÇO */}
-        <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center gap-2">
-            <MapPin className="text-gray-500" size={20} />
-            <h2 className="text-lg font-semibold text-gray-700">Morada / Endereço</h2>
+        <section className="bg-white dark:bg-slate-900 rounded-[20px] shadow-[0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden">
+          <div className="bg-slate-50/50 dark:bg-slate-800/40 px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+            <MapPin className="text-slate-400 dark:text-slate-500" size={20} />
+            <h2 className="text-[15px] font-bold text-slate-700 dark:text-slate-200">Morada / Endereço</h2>
           </div>
           <div className="p-6 grid grid-cols-1 sm:grid-cols-6 gap-5">
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">CEP</label>
-              <input type="text" name="end_cep" value={form.end_cep ?? ''} onChange={handleChange} placeholder="00000-000" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-drogamais-500" />
+            <div className="sm:col-span-2 space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">CEP</label>
+              <input type="text" name="end_cep" value={form.end_cep ?? ''} onChange={handleChange} placeholder="00000-000" className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
-            <div className="sm:col-span-4">
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Rua / Logradouro</label>
-              <input type="text" name="end_rua" value={form.end_rua ?? ''} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-drogamais-500" />
+            <div className="sm:col-span-4 space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Rua / Logradouro</label>
+              <input type="text" name="end_rua" value={form.end_rua ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Número</label>
-              <input type="text" name="end_numero" value={form.end_numero ?? ''} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-drogamais-500" />
+            <div className="sm:col-span-2 space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Número</label>
+              <input type="text" name="end_numero" value={form.end_numero ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
-            <div className="sm:col-span-4">
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Complemento</label>
-              <input type="text" name="end_complemento" value={form.end_complemento ?? ''} onChange={handleChange} placeholder="Sala, Andar, etc." className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-drogamais-500" />
+            <div className="sm:col-span-4 space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Complemento</label>
+              <input type="text" name="end_complemento" value={form.end_complemento ?? ''} onChange={handleChange} placeholder="Sala, Andar, etc." className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Bairro</label>
-              <input type="text" name="end_bairro" value={form.end_bairro ?? ''} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-drogamais-500" />
+            <div className="sm:col-span-2 space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Bairro</label>
+              <input type="text" name="end_bairro" value={form.end_bairro ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
-            <div className="sm:col-span-3">
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Cidade</label>
-              <input type="text" name="end_cidade" value={form.end_cidade ?? ''} onChange={handleChange} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-drogamais-500" />
+            <div className="sm:col-span-3 space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Cidade</label>
+              <input type="text" name="end_cidade" value={form.end_cidade ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
-            <div className="sm:col-span-1">
-              <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">UF</label>
-              <input type="text" name="end_uf" value={form.end_uf ?? ''} onChange={handleChange} maxLength="2" placeholder="SP" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-drogamais-500 uppercase" />
+            <div className="sm:col-span-1 space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">UF</label>
+              <input type="text" name="end_uf" value={form.end_uf ?? ''} onChange={handleChange} maxLength="2" placeholder="SP" className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 uppercase text-center" />
             </div>
           </div>
         </section>
 
         {/* HORÁRIOS */}
-        <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <section className="bg-white dark:bg-slate-900 rounded-[20px] shadow-[0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden">
+          <div className="bg-slate-50/50 dark:bg-slate-800/40 px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Clock className="text-gray-500" size={20} />
-              <h2 className="text-lg font-semibold text-gray-700">Horário de Funcionamento</h2>
+              <Clock className="text-slate-400 dark:text-slate-500" size={20} />
+              <h2 className="text-[15px] font-bold text-slate-700 dark:text-slate-200">Horário de Funcionamento</h2>
             </div>
           </div>
           
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {DIAS_SEMANA.map(({ prefix, label }) => {
               const isOpen = form[`is_${prefix}_aberto`];
               const abre = parseTime(form[`${prefix}_abre`]);
               const fecha = parseTime(form[`${prefix}_fecha`]);
 
               return (
-                <div key={prefix} className="p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between sm:w-48 shrink-0">
-                    <span className="font-medium text-gray-700">{label}</span>
-                    <Switch 
-                      checked={isOpen} 
-                      onChange={(val) => setForm({ ...form, [`is_${prefix}_aberto`]: val })} 
-                    />
+                <div key={prefix} className={`p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center gap-4 transition-colors ${isOpen ? 'bg-white dark:bg-slate-900' : 'hover:bg-slate-50 dark:hover:bg-slate-800/30'}`}>
+                  <div className="flex items-center justify-between sm:w-64 shrink-0">
+                    <span className="font-bold text-[14px] text-slate-700 dark:text-slate-300 tracking-tight w-24">{label}</span>
+                    
+                    <div className="flex items-center gap-4">
+                      <button
+                        type="button"
+                        onClick={() => toggle24h(prefix)}
+                        className={`text-[10px] font-black px-2 py-1 rounded-md border transition-all ${
+                          form[`is_${prefix}_24h`] 
+                            ? 'bg-drogamais-500 text-white border-drogamais-600 shadow-sm' 
+                            : 'bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700'
+                        }`}
+                      >
+                        24h
+                      </button>
+
+                      <Switch 
+                        checked={isOpen} 
+                        onChange={(val) => setForm({ ...form, [`is_${prefix}_aberto`]: val, [`is_${prefix}_24h`]: val ? form[`is_${prefix}_24h`] : false })} 
+                      />
+                    </div>
                   </div>
 
                   <div className="flex-1 flex items-center gap-3">
                     {!isOpen ? (
-                      <span className="text-gray-400 font-medium text-sm bg-gray-100 px-3 py-1.5 rounded-md">Fechado</span>
+                      <span className="text-[11px] font-black uppercase tracking-tighter text-slate-400 dark:text-slate-600 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200/50 dark:border-slate-700/50">Fechado</span>
                     ) : (
-                      <div className="flex items-center gap-3 animate-in fade-in zoom-in-95 duration-200 w-full">
+                      <div className={`flex items-center gap-3 animate-in fade-in zoom-in-95 duration-200 w-full ${form[`is_${prefix}_24h`] ? 'opacity-50 pointer-events-none' : ''}`}>
                         {/* ABERTURA */}
-                        <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg px-2 py-1 shadow-sm">
-                          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide mr-1 select-none">Abre</span>
-                          <select value={abre.h} onChange={(e) => handleTimeChange(prefix, 'abre', 'h', e.target.value)} className="appearance-none bg-transparent text-sm focus:outline-none font-medium text-gray-700 cursor-pointer">
+                        <div className="flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 shadow-sm hover:shadow-md transition-shadow">
+                          <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mr-1 select-none">Abre</span>
+                          <select 
+                            disabled={form[`is_${prefix}_24h`]}
+                            value={abre.h} 
+                            onChange={(e) => handleTimeChange(prefix, 'abre', 'h', e.target.value)} 
+                            className="appearance-none bg-transparent text-sm focus:outline-none font-bold text-slate-700 dark:text-white cursor-pointer px-1 disabled:cursor-not-allowed"
+                          >
                             <option value="" disabled>--</option>
                             {horas.map(h => <option key={`h-${h}`} value={h}>{h}</option>)}
                           </select>
-                          <span className="text-gray-400 select-none">:</span>
-                          <select value={abre.m} onChange={(e) => handleTimeChange(prefix, 'abre', 'm', e.target.value)} className="appearance-none bg-transparent text-sm focus:outline-none font-medium text-gray-700 cursor-pointer">
+                          <span className="text-slate-300 dark:text-slate-600 select-none font-bold">:</span>
+                          <select 
+                            disabled={form[`is_${prefix}_24h`]}
+                            value={abre.m} 
+                            onChange={(e) => handleTimeChange(prefix, 'abre', 'm', e.target.value)} 
+                            className="appearance-none bg-transparent text-sm focus:outline-none font-bold text-slate-700 dark:text-white cursor-pointer px-1 disabled:cursor-not-allowed"
+                          >
                             <option value="" disabled>--</option>
                             {minutos.map(m => <option key={`m-${m}`} value={m}>{m}</option>)}
                           </select>
                         </div>
                         
-                        <span className="text-gray-300 font-medium text-sm">até</span>
+                        <span className="text-slate-300 dark:text-slate-600 font-bold text-xs">até</span>
 
                         {/* FECHAMENTO */}
-                        <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg px-2 py-1 shadow-sm">
-                          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide mr-1 select-none">Fecha</span>
-                          <select value={fecha.h} onChange={(e) => handleTimeChange(prefix, 'fecha', 'h', e.target.value)} className="appearance-none bg-transparent text-sm focus:outline-none font-medium text-gray-700 cursor-pointer">
+                        <div className="flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 shadow-sm hover:shadow-md transition-shadow">
+                          <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mr-1 select-none">Fecha</span>
+                          <select 
+                            disabled={form[`is_${prefix}_24h`]}
+                            value={fecha.h} 
+                            onChange={(e) => handleTimeChange(prefix, 'fecha', 'h', e.target.value)} 
+                            className="appearance-none bg-transparent text-sm focus:outline-none font-bold text-slate-700 dark:text-white cursor-pointer px-1 disabled:cursor-not-allowed"
+                          >
                             <option value="" disabled>--</option>
                             {horas.map(h => <option key={`h-${h}`} value={h}>{h}</option>)}
                           </select>
-                          <span className="text-gray-400 select-none">:</span>
-                          <select value={fecha.m} onChange={(e) => handleTimeChange(prefix, 'fecha', 'm', e.target.value)} className="appearance-none bg-transparent text-sm focus:outline-none font-medium text-gray-700 cursor-pointer">
+                          <span className="text-slate-300 dark:text-slate-600 select-none font-bold">:</span>
+                          <select 
+                            disabled={form[`is_${prefix}_24h`]}
+                            value={fecha.m} 
+                            onChange={(e) => handleTimeChange(prefix, 'fecha', 'm', e.target.value)} 
+                            className="appearance-none bg-transparent text-sm focus:outline-none font-bold text-slate-700 dark:text-white cursor-pointer px-1 disabled:cursor-not-allowed"
+                          >
                             <option value="" disabled>--</option>
                             {minutos.map(m => <option key={`m-${m}`} value={m}>{m}</option>)}
                           </select>

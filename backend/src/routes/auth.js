@@ -48,6 +48,7 @@ export async function authRoutes(fastify) {
     const token = fastify.jwt.sign(
       {
         loja_id: loja.id,
+        email: email,
         nome_fantasia: loja.nome_fantasia,
         cnpj: loja.cnpj,
         loja_numero: loja.loja_numero,

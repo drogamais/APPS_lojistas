@@ -189,8 +189,10 @@ export default function AdminHomePage() {
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className={`flex justify-between items-center p-3 bg-white border rounded-xl group transition-all mb-2 ${
-            snapshot.isDragging ? 'shadow-xl ring-2 ring-drogamais-500 scale-105 z-50 border-transparent' : 'border-gray-200 hover:border-drogamais-300'
+          className={`flex justify-between items-center p-3 bg-white dark:bg-slate-800 border rounded-xl group transition-all mb-2 ${
+            snapshot.isDragging 
+              ? 'shadow-xl ring-2 ring-drogamais-500 scale-105 z-50 border-transparent bg-white dark:bg-slate-700' 
+              : 'border-slate-200 dark:border-slate-700 hover:border-drogamais-300 dark:hover:border-drogamais-900'
           }`}
         >
           <div className="flex items-center gap-3 flex-1 min-w-0 pr-2">
@@ -205,30 +207,32 @@ export default function AdminHomePage() {
             )}
             
             <div className="flex flex-col min-w-0">
-              <span className="font-bold text-[13px] text-gray-800 flex items-center gap-2 flex-wrap truncate">
+              <span className="font-bold text-[13px] text-slate-800 dark:text-slate-100 flex items-center gap-2 flex-wrap truncate">
                 {item.titulo}
                 {item.data_expiracao && (
-                  <span className={`px-1 rounded text-[9px] font-mono border tracking-wide whitespace-nowrap ${
-                    new Date(item.data_expiracao) <= new Date() ? 'bg-red-50 text-red-600 border-red-200' : 'bg-slate-50 text-slate-500 border-slate-200'
+                  <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold border tracking-wide whitespace-nowrap ${
+                    new Date(item.data_expiracao) <= new Date() 
+                      ? 'bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/50' 
+                      : 'bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600'
                   }`}>⏳ {formatExpMsg(item.data_expiracao)}</span>
                 )}
               </span>
-              <span className="text-[11px] text-gray-400 truncate mt-0.5">
+              <span className="text-[11px] text-slate-400 dark:text-slate-500 truncate mt-0.5">
                 {type === 'links' ? `${item.url} (${item.icone_nome||'sem ícone'})` : type === 'avisos' ? item.descricao_ou_imagem : item.imagem_url}
               </span>
             </div>
           </div>
           
           <div className="flex gap-1 shrink-0">
-            <button onClick={() => openEdit(type, item)} className="p-1.5 text-gray-400 hover:text-drogamais-500 hover:bg-drogamais-50 rounded transition"><Edit2 size={15} /></button>
-            <button onClick={() => handleDelete(type, item.id)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition"><Trash2 size={15} /></button>
+            <button onClick={() => openEdit(type, item)} className="p-1.5 text-slate-400 hover:text-drogamais-500 hover:bg-drogamais-50 dark:hover:bg-drogamais-500/10 rounded transition"><Edit2 size={15} /></button>
+            <button onClick={() => handleDelete(type, item.id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded transition"><Trash2 size={15} /></button>
           </div>
         </div>
       )}
     </Draggable>
   )
 
-  if (loading) return <p className="text-gray-500 p-8">Carregando painel de administração...</p>
+  if (loading) return <p className="text-slate-500 dark:text-slate-400 p-8 animate-pulse italic">Carregando painel de administração...</p>
 
   // Listas da aba atual
   const activeData = activeTab === 'links' ? links : activeTab === 'avisos' ? avisos : promocoes
@@ -236,25 +240,25 @@ export default function AdminHomePage() {
   const listOcultos = activeData.filter(i => isInactive(i)).sort((a,b) => a.ordem - b.ordem)
 
   return (
-    <div className="max-w-6xl w-full pb-12 animate-in fade-in select-none">
-      <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div className="max-w-6xl mx-auto w-full pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500 select-none">
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Administração de Conteúdo</h1>
-          <p className="text-gray-500 mt-1 text-sm">
+          <h1 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">Administração de Conteúdo</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm font-medium">
             Arraste os cards para o bloco da direita para ocultá-los do mural. Expirados pulam automaticamente.
           </p>
         </div>
         <button 
           onClick={() => handleAddNew(activeTab)} 
-          className="bg-drogamais-500 hover:bg-drogamais-600 text-white font-medium px-4 py-2.5 rounded-lg flex items-center gap-2 transition"
+          className="bg-drogamais-500 hover:bg-drogamais-600 text-white font-bold px-5 py-3 rounded-xl flex items-center gap-2 transition hover:scale-105 active:scale-95 shadow-lg shadow-drogamais-500/20"
         >
-          <Plus size={18} /> 
+          <Plus size={18} strokeWidth={3} /> 
           Novo {activeTab === 'links' ? 'SISTEMA' : activeTab === 'promocoes' ? 'BANNER' : 'AVISO'}
         </button>
       </div>
 
       {/* ── TABS NAVEGADORAS ── */}
-      <div className="flex border-b border-gray-200 mb-6 overflow-x-auto select-none rounded-t-xl bg-slate-50/50">
+      <div className="flex border-b border-slate-200 dark:border-slate-800 mb-8 overflow-x-auto select-none rounded-t-2xl bg-white dark:bg-slate-900">
         {[
           { id: 'promocoes', label: 'Banners de Promoção' },
           { id: 'links', label: 'Carrossel de Sistemas' },
@@ -263,8 +267,10 @@ export default function AdminHomePage() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-6 py-4 font-bold text-sm tracking-wide transition-all whitespace-nowrap border-b-[3px]
-              ${activeTab === tab.id ? 'border-drogamais-500 text-drogamais-600 bg-white' : 'border-transparent text-gray-400 hover:text-gray-700 hover:bg-white/50'}`}
+            className={`px-8 py-4 font-bold text-[13px] uppercase tracking-widest transition-all whitespace-nowrap border-b-[3px]
+              ${activeTab === tab.id 
+                ? 'border-drogamais-500 text-drogamais-600 bg-white dark:bg-slate-800/10' 
+                : 'border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/20'}`}
           >
             {tab.label}
           </button>
@@ -276,48 +282,48 @@ export default function AdminHomePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
           
           {/* COLUNA 1: ATIVOS NA TELA */}
-          <div className="bg-slate-50 rounded-2xl border border-slate-200 shadow-inner flex flex-col h-[65vh] min-h-[500px]">
-            <div className="p-4 border-b border-slate-200 bg-white rounded-t-2xl flex items-center justify-between">
-              <h2 className="font-bold text-slate-800 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                VISÍVEIS NA HOME
+          <div className="bg-slate-50 dark:bg-slate-900 rounded-[24px] border border-slate-200 dark:border-slate-800 shadow-inner flex flex-col h-[65vh] min-h-[500px]">
+            <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-t-[24px] flex items-center justify-between shadow-sm">
+              <h2 className="font-black text-slate-800 dark:text-white flex items-center gap-2 text-xs tracking-widest uppercase">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
+                Visíveis na Home
               </h2>
-              <span className="text-xs bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full font-bold">{listAtivos.length}</span>
+              <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2.5 py-1 rounded-full font-black tabular-nums border border-slate-200 dark:border-slate-700">{listAtivos.length}</span>
             </div>
             <Droppable droppableId="zone-ativos" direction="vertical">
               {(provided, snapshot) => (
                 <div 
                   {...provided.droppableProps} 
                   ref={provided.innerRef} 
-                  className={`p-4 flex-1 overflow-y-auto transition-colors ${snapshot.isDraggingOver ? 'bg-emerald-50/50' : ''}`}
+                  className={`p-4 flex-1 overflow-y-auto transition-colors ${snapshot.isDraggingOver ? 'bg-emerald-50/50 dark:bg-emerald-950/20' : ''}`}
                 >
                   {listAtivos.map((item, index) => renderItemCard(item, index, activeTab))}
                   {provided.placeholder}
-                  {listAtivos.length === 0 && <p className="text-sm text-center py-10 text-slate-400 italic">Nenhum item visível. Arraste para cá.</p>}
+                  {listAtivos.length === 0 && <p className="text-xs text-center py-12 text-slate-400 dark:text-slate-600 italic font-medium">Nenhum item visível. Arraste para cá.</p>}
                 </div>
               )}
             </Droppable>
           </div>
 
           {/* COLUNA 2: OCULTOS / EXPIRADOS */}
-          <div className="bg-slate-50/70 rounded-2xl border border-slate-200/60 shadow-inner opacity-90 hover:opacity-100 transition-opacity flex flex-col h-[65vh] min-h-[500px]">
-            <div className="p-4 border-b border-slate-200/60 bg-white/50 rounded-t-2xl flex items-center justify-between">
-              <h2 className="font-bold text-slate-500 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
-                GELADEIRA (Ocultos / Expirados)
+          <div className="bg-slate-50/70 dark:bg-slate-900/40 rounded-[24px] border border-slate-200/60 dark:border-slate-800/60 shadow-inner flex flex-col h-[65vh] min-h-[500px]">
+            <div className="p-4 border-b border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 rounded-t-[24px] flex items-center justify-between shadow-sm">
+              <h2 className="font-black text-slate-400 dark:text-slate-600 flex items-center gap-2 text-xs tracking-widest uppercase">
+                <span className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-700"></span>
+                Geladeira (Ocultos)
               </h2>
-              <span className="text-xs bg-slate-200 text-slate-500 px-2.5 py-1 rounded-full font-bold">{listOcultos.length}</span>
+              <span className="text-[10px] bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-500 px-2.5 py-1 rounded-full font-black tabular-nums border border-slate-200/60 dark:border-slate-700">{listOcultos.length}</span>
             </div>
             <Droppable droppableId="zone-ocultos" direction="vertical">
               {(provided, snapshot) => (
                 <div 
                   {...provided.droppableProps} 
                   ref={provided.innerRef} 
-                  className={`p-4 flex-1 overflow-y-auto transition-colors ${snapshot.isDraggingOver ? 'bg-red-50/30' : ''}`}
+                  className={`p-4 flex-1 overflow-y-auto transition-colors ${snapshot.isDraggingOver ? 'bg-red-50/30 dark:bg-red-950/20' : ''}`}
                 >
                   {listOcultos.map((item, index) => renderItemCard(item, index, activeTab))}
                   {provided.placeholder}
-                  {listOcultos.length === 0 && <p className="text-sm text-center py-10 text-slate-400 italic">Geladeira vazia.</p>}
+                  {listOcultos.length === 0 && <p className="text-xs text-center py-12 text-slate-400 dark:text-slate-600 italic font-medium">Geladeira vazia.</p>}
                 </div>
               )}
             </Droppable>
@@ -328,77 +334,85 @@ export default function AdminHomePage() {
 
       {/* MODAL DE EDIÇÃO */}
       {editingItem && (
-        <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 shadow-2xl backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl border border-gray-100 flex flex-col gap-4">
-            <div className="flex justify-between items-center border-b pb-3 border-gray-100">
-              <h3 className="font-bold text-lg text-gray-800">
+        <div className="fixed inset-0 bg-slate-950/80 dark:bg-black/80 z-50 flex items-center justify-center p-4 shadow-2xl backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-slate-900 rounded-[28px] w-full max-w-lg p-8 shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col gap-5">
+            <div className="flex justify-between items-center border-b pb-4 border-slate-100 dark:border-slate-800">
+              <h3 className="font-black text-[18px] text-slate-800 dark:text-white uppercase tracking-tight">
                 Editar {activeTab.toUpperCase()}
               </h3>
-              <button onClick={() => setEditingItem(null)} className="text-gray-400 hover:text-red-500 transition">
-                <X size={20} />
+              <button 
+                onClick={() => setEditingItem(null)} 
+                className="w-10 h-10 flex items-center justify-center rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
+              >
+                <X size={22} strokeWidth={2.5} />
               </button>
             </div>
             
-            <div className="space-y-4 max-h-[60vh] overflow-y-auto px-1 pt-1 pb-4">
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase">Título</label>
+            <div className="space-y-5 max-h-[60vh] overflow-y-auto px-1">
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Título do Card</label>
                 <input 
                   value={editForm.titulo || ''} 
                   onChange={e => setEditForm({...editForm, titulo: e.target.value})}
-                  className="w-full mt-1 border border-gray-200 bg-gray-50 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-drogamais-500 outline-none" 
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-drogamais-500/20 outline-none transition-all" 
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase">Agendar Ocultação Automática</label>
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Ocultação Automática</label>
                 <input 
                   type="datetime-local"
                   value={editForm.data_expiracao_input || ''} 
                   onChange={e => setEditForm({...editForm, data_expiracao_input: e.target.value})}
-                  className="w-full mt-1 border border-gray-200 bg-gray-50 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-drogamais-500 outline-none" 
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-drogamais-500/20 outline-none transition-all" 
                 />
-                <p className="text-[11px] text-gray-400 mt-1.5 leading-relaxed">Deixe o campo vazio para manter no ar indefinidamente. Se agendado, o card pulará para a "Geladeira" assim que essa data/hora passar.</p>
+                <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 px-1 mt-1 leading-relaxed">Se agendado, o card pulará para a "Geladeira" no horário definido.</p>
               </div>
 
               {activeTab === 'links' && (
                 <>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase">URL do Parceiro</label>
-                    <input value={editForm.url || ''} onChange={e => setEditForm({...editForm, url: e.target.value})} className="w-full mt-1 border border-gray-200 rounded-lg p-2.5 text-sm outline-none bg-gray-50" />
+                  <div className="space-y-1.5">
+                    <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">URL do Parceiro</label>
+                    <input value={editForm.url || ''} onChange={e => setEditForm({...editForm, url: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase">Ícone</label>
-                    <input value={editForm.icone_nome || ''} onChange={e => setEditForm({...editForm, icone_nome: e.target.value})} className="w-full mt-1 border border-gray-200 rounded-lg p-2.5 text-sm outline-none bg-gray-50" placeholder="Ex: Star, Truck" />
+                  <div className="space-y-1.5">
+                    <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nome do Ícone Lucide</label>
+                    <input value={editForm.icone_nome || ''} onChange={e => setEditForm({...editForm, icone_nome: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" placeholder="Ex: Star, Truck, Mail" />
                   </div>
                 </>
               )}
               {activeTab === 'avisos' && (
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase">Mensagem</label>
-                  <textarea value={editForm.descricao_ou_imagem || ''} onChange={e => setEditForm({...editForm, descricao_ou_imagem: e.target.value})} className="w-full mt-1 border border-gray-200 rounded-lg p-2.5 text-sm min-h-[120px] outline-none bg-gray-50" />
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Mensagem do Aviso</label>
+                  <textarea value={editForm.descricao_ou_imagem || ''} onChange={e => setEditForm({...editForm, descricao_ou_imagem: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 dark:text-white min-h-[120px] outline-none" />
                 </div>
               )}
               {activeTab === 'promocoes' && (
                 <>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase">URL da Imagem</label>
-                    <input value={editForm.imagem_url || ''} onChange={e => setEditForm({...editForm, imagem_url: e.target.value})} className="w-full mt-1 border border-gray-200 rounded-lg p-2.5 text-sm outline-none bg-gray-50" />
+                  <div className="space-y-1.5">
+                    <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">URL da Imagem Banner</label>
+                    <input value={editForm.imagem_url || ''} onChange={e => setEditForm({...editForm, imagem_url: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase">Link de Destino</label>
-                    <input value={editForm.url_destino || ''} onChange={e => setEditForm({...editForm, url_destino: e.target.value})} className="w-full mt-1 border border-gray-200 rounded-lg p-2.5 text-sm outline-none bg-gray-50" />
+                  <div className="space-y-1.5">
+                    <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Link de Destino</label>
+                    <input value={editForm.url_destino || ''} onChange={e => setEditForm({...editForm, url_destino: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
                   </div>
                 </>
               )}
             </div>
 
-            <div className="mt-2 pt-4 border-t border-gray-100 flex justify-end gap-3">
-              <button onClick={() => setEditingItem(null)} className="px-4 py-2 text-sm text-gray-500 font-medium hover:bg-gray-100 rounded-lg transition">Cancelar</button>
+            <div className="mt-4 pt-5 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
+              <button 
+                onClick={() => setEditingItem(null)} 
+                className="px-6 py-3 text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all"
+              >
+                Cancelar
+              </button>
               <button 
                 onClick={saveEdit} 
-                className="bg-drogamais-500 hover:bg-drogamais-600 shadow-md shadow-drogamais-500/20 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2 transition"
+                className="bg-drogamais-500 hover:bg-drogamais-600 shadow-xl shadow-drogamais-500/20 text-white px-8 py-3 rounded-xl font-black text-sm uppercase tracking-wide flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
               >
-                <Save size={16} /> Salvar Edição
+                <Save size={18} strokeWidth={3} /> Salvar Edição
               </button>
             </div>
           </div>
