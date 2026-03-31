@@ -76,22 +76,30 @@ function AvisosCarousel({ avisos }) {
               {pageGrp.map((aviso) => (
                 <div
                   key={aviso.id}
-                  className="w-full sm:flex-1 max-w-[340px] shrink-0 bg-slate-50 rounded-[16px] border border-slate-100 p-5 
-                             flex flex-col justify-between hover:bg-white
-                             hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:border-drogamais-100 hover:-translate-y-0.5
-                             transition-all min-h-[140px]"
+                  className="w-full sm:flex-1 max-w-[340px] shrink-0 relative bg-gradient-to-b from-white to-slate-50/50 rounded-[16px] p-5 
+                             flex flex-col justify-between border border-slate-200/80 shadow-[0_6px_16px_rgba(0,0,0,0.04)] 
+                             hover:shadow-[0_12px_28px_rgba(0,0,0,0.08)] hover:border-drogamais-300 hover:-translate-y-1 
+                             transition-all duration-300 min-h-[140px] overflow-hidden group cursor-default"
                 >
-                  <div>
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <h3 className="text-[13.5px] font-bold text-slate-800 leading-snug truncate">
-                        {aviso.titulo}
-                      </h3>
-                      <span className="shrink-0 text-[10px] font-bold text-slate-400 bg-white border border-slate-200
-                                       px-2 py-0.5 rounded-full whitespace-nowrap">
+                  {/* Faixa de Destaque no Topo */}
+                  <div className="absolute top-0 left-0 w-full h-[5px] bg-gradient-to-r from-drogamais-400 via-drogamais-500 to-sky-400 opacity-90 group-hover:opacity-100 transition-opacity" />
+
+                  <div className="relative z-10 pt-1">
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-7 h-7 rounded-full bg-drogamais-50/80 flex items-center justify-center shrink-0 border border-drogamais-100/50 group-hover:bg-drogamais-100 transition-colors">
+                          <LucideIcons.Bell size={13} className="text-drogamais-600" />
+                        </div>
+                        <h3 className="text-[14px] font-[800] text-slate-800 leading-tight truncate">
+                          {aviso.titulo}
+                        </h3>
+                      </div>
+                      <span className="shrink-0 text-[10px] font-bold text-slate-500 bg-white border border-slate-200/80 shadow-sm
+                                       px-2.5 py-0.5 rounded-full whitespace-nowrap">
                         {new Date(aviso.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
                       </span>
                     </div>
-                    <p className="text-[12.5px] text-slate-500 leading-relaxed line-clamp-3 whitespace-pre-wrap">
+                    <p className="text-[13px] text-slate-600 leading-relaxed font-medium line-clamp-3 whitespace-pre-wrap ml-1">
                       {aviso.descricao_ou_imagem}
                     </p>
                   </div>
@@ -368,10 +376,10 @@ export default function HomePage() {
       </div>
 
       {/* ── BENTO BOX GRID ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 lg:gap-6 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px] gap-6 lg:gap-8 items-start">
         
-        {/* COLUNA ESQUERDA (Principal 3/4) */}
-        <div className="xl:col-span-3 flex flex-col space-y-4 lg:space-y-5 min-w-0">
+        {/* COLUNA ESQUERDA (Principal Fluída) */}
+        <div className="flex flex-col space-y-5 lg:space-y-6 min-w-0">
           
           {/* Mural de Avisos em Carrossel Minimalista */}
           {avisos.length > 0 && (
@@ -416,8 +424,8 @@ export default function HomePage() {
         </div>
 
 
-        {/* COLUNA DIREITA (Lateral 1/3) */}
-        <div className="xl:col-span-1 h-full">
+        {/* COLUNA DIREITA (Lateral Fixa 340px) */}
+        <div className="h-full w-full">
           <QuickAccessPanel links={links} />
         </div>
 

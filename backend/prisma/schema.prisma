@@ -99,9 +99,10 @@ model LojaHomeLink {
   url         String   @db.VarChar(500)
   icone_nome  String?  @db.VarChar(50)
   ordem       Int      @default(0)
-  ativo       Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  ativo          Boolean   @default(true)
+  data_expiracao DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   @@map("fat_home_links")
 }
@@ -111,9 +112,10 @@ model LojaHomeAviso {
   titulo              String   @db.VarChar(200)
   descricao_ou_imagem String   @db.Text
   ordem               Int      @default(0)
-  ativo               Boolean  @default(true)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  ativo               Boolean   @default(true)
+  data_expiracao      DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   @@map("fat_home_avisos")
 }
@@ -124,9 +126,10 @@ model LojaHomePromocao {
   imagem_url  String   @db.VarChar(1000)
   url_destino String?  @db.VarChar(500)
   ordem       Int      @default(0)
-  ativo       Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  ativo          Boolean   @default(true)
+  data_expiracao DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   @@map("fat_home_promocoes")
 }

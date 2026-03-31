@@ -173,7 +173,7 @@ export default function Layout() {
           ÁREA DE CONTEÚDO PRINCIPAL
       ════════════════════════════════ */}
       <main className="flex-1 min-w-0 flex flex-col pt-14 md:pt-0">
-        <div className="flex-1 p-4 md:p-8 max-w-[1400px] w-full mx-auto">
+        <div className="flex-1 p-4 md:p-8 max-w-[1800px] w-full mx-auto">
           <Outlet />
         </div>
       </main>
