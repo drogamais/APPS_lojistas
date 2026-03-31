@@ -160,7 +160,7 @@ function PromocoesCarousel({ promocoes }) {
 
   // Coverflow Interativo Dinâmico (Reduzido para 640x360 banner format)
   return (
-    <div className="relative w-full py-2 pb-10 flex flex-col items-center overflow-x-hidden">
+    <div className="relative w-full pt-2 pb-5 flex flex-col items-center overflow-x-hidden">
       
       {/* Container das Imagens */}
       <div className="relative w-full max-w-5xl flex items-center justify-center 
@@ -215,7 +215,7 @@ function PromocoesCarousel({ promocoes }) {
       </div>
 
       {/* Setas e Bolinhas Centrais */}
-      <div className="flex items-center gap-5 mt-6 z-40">
+      <div className="flex items-center gap-5 mt-4 z-40">
         <button
           onClick={prev}
           className="p-1.5 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-slate-100 hover:bg-drogamais-50 text-slate-500 hover:text-drogamais-500 transition focus:outline-none"
@@ -348,7 +348,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="pb-12 space-y-8 animate-in mt-4">
+    <div className="pb-8 space-y-6 animate-in mt-2">
 
       {/* ── Saudação do topo ── */}
       <div className="flex items-center justify-between px-2">
@@ -368,15 +368,15 @@ export default function HomePage() {
       </div>
 
       {/* ── BENTO BOX GRID ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 lg:gap-8 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 lg:gap-6 items-start">
         
         {/* COLUNA ESQUERDA (Principal 3/4) */}
-        <div className="xl:col-span-3 flex flex-col space-y-6 lg:space-y-8 min-w-0">
+        <div className="xl:col-span-3 flex flex-col space-y-4 lg:space-y-5 min-w-0">
           
           {/* Mural de Avisos em Carrossel Minimalista */}
           {avisos.length > 0 && (
              <section className="bg-white rounded-[24px] border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden">
-                <div className="p-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+                <div className="p-5 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
                   <div className="flex items-center gap-2">
                     <LucideIcons.Megaphone size={18} className="text-drogamais-500" />
                     <h2 className="text-[15px] font-bold text-slate-800 tracking-wide">Mural de Avisos</h2>
@@ -387,7 +387,7 @@ export default function HomePage() {
                 </div>
                 
                 {/* Reutilizando a lógica do carrossel antigo, mas num container sem bordas */}
-                <div className="p-2 sm:p-5">
+                <div className="p-1 sm:p-2">
                   <AvisosCarousel avisos={avisos} />
                 </div>
              </section>
@@ -396,11 +396,11 @@ export default function HomePage() {
           {/* Destaques e Promoções */}
           {promocoes.length > 0 && (
              <div className="bg-white rounded-[24px] border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden">
-                <div className="pt-6 px-6 flex items-center gap-2">
+                <div className="pt-5 px-6 flex items-center gap-2">
                   <LucideIcons.Star size={18} className="text-drogamais-500" />
                   <h2 className="text-[15px] font-bold text-slate-800 tracking-wide">Destaques e Promoções</h2>
                 </div>
-                <div className="px-2 mt-6 pb-2">
+                <div className="px-2 mt-2 pb-0">
                   <PromocoesCarousel promocoes={promocoes} />
                 </div>
              </div>
