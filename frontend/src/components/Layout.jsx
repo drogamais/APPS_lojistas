@@ -9,17 +9,15 @@ import {
 import LogoDrogamais from '../assets/logo-login.svg'
 
 /* ─── larguras do sidebar ─── */
-const SIDEBAR_W_EXPANDED  = 'w-[240px]'
-const SIDEBAR_W_COLLAPSED = 'w-[68px]'
+const SIDEBAR_W_EXPANDED  = '240px'
+const SIDEBAR_W_COLLAPSED = '68px'
 
 export default function Layout() {
-  const { logout, isAdmin, user } = useAuth()
+  const { logout, isAdmin } = useAuth()
   const navigate = useNavigate()
 
   /* mobile: drawer aberto/fechado */
   const [mobileOpen, setMobileOpen] = useState(false)
-  /* desktop: sidebar expandida/colapsada */
-  const [collapsed, setCollapsed] = useState(false)
 
   const navLinks = [
     { to: '/home',        label: 'Home',        icon: Home },
@@ -31,74 +29,61 @@ export default function Layout() {
     navLinks.push({ to: '/admin/home', label: 'Admin', icon: Settings })
   }
 
-  /* ── Sidebar compartilhado (desktop + mobile drawer) ── */
-  function SidebarContent({ onNavigate }) {
+  /* ── Sidebar compartilhado (desktop hover + mobile drawer) ── */
+  function SidebarContent({ onNavigate, isDesktop }) {
     return (
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full overflow-hidden">
 
         {/* ── Cabeçalho do sidebar ── */}
-        <div className="h-16 flex items-center px-4 border-b border-slate-100 shrink-0">
-          {/* Logo */}
+        <div className="h-16 flex items-center px-[17px] border-b border-slate-100 shrink-0">
           <div
-            className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer"
+            className="flex items-center flex-1 min-w-0 cursor-pointer"
             onClick={() => { navigate('/home'); onNavigate?.() }}
           >
             <img
               src={LogoDrogamais}
               alt="Drogamais"
-              className="w-8 h-8 shrink-0"
+              className="w-[34px] h-[34px] shrink-0"
             />
-            {!collapsed && (
-              <span className="font-extrabold text-[15px] text-drogamais-500 tracking-tight truncate">
-                Drogamais
-              </span>
-            )}
+            {/* O Texto aparece automaticamente quando o group (sidebar) sofrer hover, ou no mobile */}
+            <span className={`font-extrabold text-[15.5px] text-drogamais-500 tracking-tight ml-3 whitespace-nowrap transition-opacity duration-200
+                             ${isDesktop ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'} `}>
+              Drogamais
+            </span>
           </div>
-
-          {/* Botão colapsar (só desktop) */}
-          <button
-            onClick={() => setCollapsed(c => !c)}
-            title={collapsed ? 'Expandir menu' : 'Colapsar menu'}
-            className="hidden md:flex items-center justify-center w-7 h-7 rounded-lg text-slate-400
-                       hover:text-drogamais-500 hover:bg-drogamais-50 transition-all shrink-0"
-          >
-            {collapsed
-              ? <ChevronRight size={16} strokeWidth={2.5} />
-              : <ChevronLeft  size={16} strokeWidth={2.5} />
-            }
-          </button>
         </div>
 
         {/* ── Links de navegação ── */}
-        <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5">
+        <nav className="flex-1 overflow-y-auto py-5 px-3 space-y-1">
           {navLinks.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
               onClick={() => onNavigate?.()}
-              title={collapsed ? label : undefined}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-medium
-                 transition-all duration-150 group relative
+                `flex items-center px-2.5 py-3 rounded-[12px] text-[13.5px] font-medium
+                 transition-colors relative overflow-hidden
                  ${isActive
                    ? 'bg-drogamais-50 text-drogamais-600'
-                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                 }
-                 ${collapsed ? 'justify-center' : ''}`
+                   : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                 }`
               }
             >
               {({ isActive }) => (
                 <>
                   {/* indicador lateral ativo */}
                   {isActive && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-drogamais-500 rounded-r-full" />
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-drogamais-500 rounded-r-full" />
                   )}
                   <Icon
-                    size={18}
-                    strokeWidth={isActive ? 2.2 : 1.8}
-                    className="shrink-0"
+                    size={20}
+                    strokeWidth={isActive ? 2.5 : 2}
+                    className={`shrink-0 ${isActive ? 'text-drogamais-500' : ''}`}
                   />
-                  {!collapsed && <span>{label}</span>}
+                  <span className={`ml-4 whitespace-nowrap transition-opacity duration-200
+                                   ${isDesktop ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'}`}>
+                    {label}
+                  </span>
                 </>
               )}
             </NavLink>
@@ -106,17 +91,18 @@ export default function Layout() {
         </nav>
 
         {/* ── Rodapé: botão sair ── */}
-        <div className="p-2 border-t border-slate-100 shrink-0">
+        <div className="p-3 border-t border-slate-100 shrink-0">
           <button
             onClick={() => { logout(); onNavigate?.() }}
-            title={collapsed ? 'Sair' : undefined}
-            className={`flex items-center gap-3 w-full px-3 py-2.5 text-[13.5px] font-medium
-                        text-slate-500 hover:bg-red-50 hover:text-drogamais-600 rounded-xl
-                        transition-all duration-150
-                        ${collapsed ? 'justify-center' : ''}`}
+            className="flex items-center w-full px-2.5 py-3 text-[13.5px] font-medium
+                       text-slate-500 hover:bg-red-50 hover:text-drogamais-600 rounded-[12px]
+                       transition-colors overflow-hidden"
           >
-            <LogOut size={18} strokeWidth={1.8} className="shrink-0" />
-            {!collapsed && <span>Sair</span>}
+            <LogOut size={20} className="shrink-0" strokeWidth={2} />
+            <span className={`ml-4 whitespace-nowrap transition-opacity duration-200
+                             ${isDesktop ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'}`}>
+              Sair
+            </span>
           </button>
         </div>
       </div>
@@ -129,9 +115,8 @@ export default function Layout() {
       {/* ════════════════════════════════
           MOBILE: Topbar + Drawer
       ════════════════════════════════ */}
-      {/* Topbar mobile */}
       <div className="md:hidden fixed top-0 inset-x-0 h-14 bg-white border-b border-slate-100
-                      z-50 flex items-center justify-between px-4 shadow-sm">
+                      z-30 flex items-center justify-between px-4 shadow-sm">
         <button
           onClick={() => setMobileOpen(true)}
           className="p-1 rounded-lg text-slate-500 hover:bg-slate-100 transition"
@@ -139,10 +124,9 @@ export default function Layout() {
           <Menu size={22} />
         </button>
         <img src={LogoDrogamais} alt="Drogamais" className="w-7 h-7" />
-        <div className="w-8" /> {/* espaçador */}
+        <div className="w-8" />
       </div>
 
-      {/* Backdrop mobile */}
       {mobileOpen && (
         <div
           className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 md:hidden"
@@ -150,7 +134,6 @@ export default function Layout() {
         />
       )}
 
-      {/* Drawer mobile */}
       <aside
         className={`fixed top-0 left-0 h-full bg-white z-50 shadow-2xl
                     transition-transform duration-300 md:hidden
@@ -159,31 +142,38 @@ export default function Layout() {
       >
         <button
           onClick={() => setMobileOpen(false)}
-          className="absolute top-3 right-3 p-1.5 rounded-lg text-slate-400
+          className="absolute top-4 right-4 p-1 rounded-lg text-slate-400
                      hover:bg-slate-100 transition"
         >
-          <X size={18} />
+          <X size={20} />
         </button>
-        <SidebarContent onNavigate={() => setMobileOpen(false)} />
+        <SidebarContent onNavigate={() => setMobileOpen(false)} isDesktop={false} />
       </aside>
 
       {/* ════════════════════════════════
-          DESKTOP: Sidebar fixa/sticky
+          DESKTOP: Sidebar Flutuante (Hover)
       ════════════════════════════════ */}
+      
+      {/* Spacer DUMMY invisível para não repuxar o layout (ocupa fixo os 68px) */}
+      <div className="hidden md:block shrink-0" style={{ width: SIDEBAR_W_COLLAPSED }} />
+
+      {/* Sidebar FIXADA sobre o layout, cresce pura e sutilmente com CSS Group-Hover */}
       <aside
-        className={`hidden md:flex flex-col h-screen sticky top-0 bg-white
-                    border-r border-slate-100 shrink-0
-                    transition-all duration-250 ease-in-out
-                    ${collapsed ? SIDEBAR_W_COLLAPSED : SIDEBAR_W_EXPANDED}`}
+        className="hidden md:flex flex-col h-screen fixed top-0 left-0 bg-white z-50
+                   border-r border-slate-100 group shadow-sm hover:shadow-[10px_0_30px_rgba(0,0,0,0.08)]
+                   transition-[width,box-shadow] duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]"
+        style={{ width: SIDEBAR_W_COLLAPSED }}
+        onMouseEnter={(e) => e.currentTarget.style.width = SIDEBAR_W_EXPANDED}
+        onMouseLeave={(e) => e.currentTarget.style.width = SIDEBAR_W_COLLAPSED}
       >
-        <SidebarContent />
+        <SidebarContent isDesktop={true} />
       </aside>
 
       {/* ════════════════════════════════
           ÁREA DE CONTEÚDO PRINCIPAL
       ════════════════════════════════ */}
       <main className="flex-1 min-w-0 flex flex-col pt-14 md:pt-0">
-        <div className="flex-1 p-4 md:p-8 max-w-6xl w-full mx-auto">
+        <div className="flex-1 p-4 md:p-8 max-w-[1400px] w-full mx-auto">
           <Outlet />
         </div>
       </main>
