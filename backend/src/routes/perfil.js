@@ -11,6 +11,7 @@ const perfilUpdateSchema = z.object({
   facebook:             z.string().max(100).optional(),
   area_loja:            z.number().optional(),
   vagas_estacionamento: z.number().int().optional(),
+  google_email:         z.string().email().max(255).optional().nullable(),
 
   // Endereço
   end_rua:         z.string().max(255).optional(),
@@ -90,6 +91,7 @@ const SAFE_SELECT = {
   sab_fecha: true,
   dom_abre:  true,
   dom_fecha: true,
+  google_email:         true,
   createdAt:            true,
   updatedAt:            true,
 }

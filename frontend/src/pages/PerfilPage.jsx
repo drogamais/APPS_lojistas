@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api.js'
-import { Clock, MapPin, Building2, Smartphone, Save, Maximize, Car, Facebook } from 'lucide-react'
+import { Clock, MapPin, Building2, Smartphone, Save, Maximize, Car, Facebook, Calendar, Check, Link } from 'lucide-react'
 
 const formatPhone = (val) => {
   if (!val) return '';
@@ -55,38 +55,72 @@ export default function PerfilPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving]   = useState(false)
   const [msg, setMsg]         = useState(null)
+  const [googleStatus, setGoogleStatus] = useState({ connected: false, email: '' })
 
   useEffect(() => {
-    api.get('/api/loja/perfil').then(({ data }) => {
-      setPerfil(data)
-      const initialForm = {
-        nome_fantasia:   data.nome_fantasia ?? '',
-        razao_social:    data.razao_social  ?? '',
-        telefone:        formatPhone(data.telefone) ?? '',
-        whatsapp:        formatPhone(data.whatsapp) ?? '',
-        instagram:       data.instagram     ?? '',
-        end_rua:         data.end_rua ?? '',
-        end_numero:      data.end_numero ?? '',
-        end_bairro:      data.end_bairro ?? '',
-        end_cidade:      data.end_cidade ?? '',
-        end_uf:          data.end_uf ?? '',
-        end_cep:         data.end_cep ?? '',
-        end_complemento: data.end_complemento ?? '',
-      };
+    async function load() {
+      try {
+        const [pRes, gRes] = await Promise.all([
+          api.get('/api/loja/perfil'),
+          api.get('/api/google/status').catch(() => ({ data: { connected: false } }))
+        ])
+        
+        const data = pRes.data
+        setPerfil(data)
+        setGoogleStatus(gRes.data)
 
-      // Injeta os horários
-      DIAS_SEMANA.forEach(({ prefix }) => {
-        const abre = data[`${prefix}_abre`] ?? '';
-        const fecha = data[`${prefix}_fecha`] ?? '';
-        initialForm[`${prefix}_abre`] = abre;
-        initialForm[`${prefix}_fecha`] = fecha;
-        initialForm[`is_${prefix}_aberto`] = !!(abre && fecha);
-        initialForm[`is_${prefix}_24h`] = (abre === '00:00' && (fecha === '23:59' || fecha === '00:00'));
-      });
+        const initialForm = {
+          nome_fantasia:   data.nome_fantasia ?? '',
+          razao_social:    data.razao_social  ?? '',
+          telefone:        formatPhone(data.telefone) ?? '',
+          whatsapp:        formatPhone(data.whatsapp) ?? '',
+          instagram:       data.instagram     ?? '',
+          facebook:        data.facebook      ?? '',
+          area_loja:       data.area_loja     ?? '',
+          vagas_estacionamento: data.vagas_estacionamento ?? '',
+          google_email:    data.google_email ?? '',
+          end_rua:         data.end_rua ?? '',
+          end_numero:      data.end_numero ?? '',
+          end_bairro:      data.end_bairro ?? '',
+          end_cidade:      data.end_cidade ?? '',
+          end_uf:          data.end_uf ?? '',
+          end_cep:         data.end_cep ?? '',
+          end_complemento: data.end_complemento ?? '',
+        };
 
-      setForm(initialForm)
-    }).finally(() => setLoading(false))
+        // Injeta os horários
+        DIAS_SEMANA.forEach(({ prefix }) => {
+          const abre = data[`${prefix}_abre`] ?? '';
+          const fecha = data[`${prefix}_fecha`] ?? '';
+          initialForm[`${prefix}_abre`] = abre;
+          initialForm[`${prefix}_fecha`] = fecha;
+          initialForm[`is_${prefix}_aberto`] = !!(abre && fecha);
+          initialForm[`is_${prefix}_24h`] = (abre === '00:00' && (fecha === '23:59' || fecha === '00:00'));
+        });
+
+        setForm(initialForm)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
   }, [])
+
+  const handleGoogleConnect = () => {
+    window.location.href = `${import.meta.env.VITE_API_URL}/api/google/auth`
+  }
+
+  const handleGoogleDisconnect = async () => {
+    if (!confirm('Deseja desconectar sua conta Google?')) return
+    try {
+      await api.post('/api/google/disconnect')
+      setGoogleStatus({ connected: false, email: '' })
+    } catch (err) {
+      alert('Erro ao desconectar.')
+    }
+  }
 
   function parseTime(val) {
     if (!val) return { h: '', m: '' };
@@ -148,7 +182,9 @@ export default function PerfilPage() {
     const submitData = {
       ...form,
       telefone: form.telefone?.replace(/\D/g, ''),
-      whatsapp: form.whatsapp?.replace(/\D/g, '')
+      whatsapp: form.whatsapp?.replace(/\D/g, ''),
+      area_loja: form.area_loja ? parseFloat(form.area_loja) : null,
+      vagas_estacionamento: form.vagas_estacionamento ? parseInt(form.vagas_estacionamento, 10) : null
     }
 
     // Limpa estado isolado (Variáveis de controle do front) e envia null para dias Fechados
@@ -408,6 +444,67 @@ export default function PerfilPage() {
                 </div>
               );
             })}
+          </div>
+        </section>
+
+        {/* INTEGRAÇÃO GOOGLE CALENDAR */}
+        <section className="bg-white dark:bg-slate-900 rounded-[20px] shadow-[0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden">
+          <div className="bg-slate-50/50 dark:bg-slate-800/40 px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Calendar className="text-slate-400 dark:text-slate-500" size={20} />
+              <h2 className="text-[15px] font-bold text-slate-700 dark:text-slate-200">Integração Google Calendar</h2>
+            </div>
+            {googleStatus.connected && (
+              <span className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-full text-[10px] font-black uppercase tracking-wider">
+                <Check size={12} strokeWidth={3} /> Conectado
+              </span>
+            )}
+          </div>
+          <div className="p-6 flex flex-col md:flex-row items-center gap-6">
+            <div className="flex-1 space-y-4">
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                Sincronize seus serviços e escalas diretamente com o **Google Calendar**. Isso permite que você e sua equipe vejam a agenda em tempo real em qualquer dispositivo.
+              </p>
+              
+              <div className="max-w-md">
+                <label className="block text-[10px] font-black underline uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">E-mail do Google Calendar (Gmail)</label>
+                <div className="relative group">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">@</span>
+                  <input 
+                    type="email"
+                    value={form.google_email || ''}
+                    onChange={(e) => setForm({ ...form, google_email: e.target.value })}
+                    placeholder="seuemail@gmail.com"
+                    className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl py-3 pl-10 pr-4 text-sm font-bold text-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              {googleStatus.connected && (
+                <p className="text-xs text-emerald-500 font-bold flex items-center gap-2">
+                  <Check size={14} /> Conta vinculada e autenticada
+                </p>
+              )}
+            </div>
+            <div className="shrink-0">
+              {googleStatus.connected ? (
+                <button 
+                  type="button" 
+                  onClick={handleGoogleDisconnect}
+                  className="px-6 py-2.5 text-xs font-black text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 border border-red-100 dark:border-red-900/50 rounded-xl transition-all"
+                >
+                  DESCONECTAR CONTA
+                </button>
+              ) : (
+                <button 
+                  type="button" 
+                  onClick={handleGoogleConnect}
+                  className="px-8 py-3 bg-[#4285F4] hover:bg-[#3367D6] text-white font-black text-xs rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2"
+                >
+                  <Link size={16} /> CONECTAR GOOGLE CALENDAR
+                </button>
+              )}
+            </div>
           </div>
         </section>
 

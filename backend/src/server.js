@@ -9,6 +9,7 @@ import { authRoutes } from './routes/auth.js'
 import { perfilRoutes } from './routes/perfil.js'
 import { balconistaRoutes } from './routes/balconistas.js'
 import { servicoRoutes } from './routes/servicos.js'
+import { googleAuthRoutes } from './routes/google_auth.js'
 import { homeRoutes } from './routes/home.js'
 
 const app = Fastify({ logger: true })
@@ -32,6 +33,7 @@ await app.register(authRoutes)
 await app.register(perfilRoutes)
 await app.register(balconistaRoutes)
 await app.register(servicoRoutes)
+await app.register(googleAuthRoutes)
 await app.register(homeRoutes)
 
 const PORT = Number(process.env.PORT) || 3333

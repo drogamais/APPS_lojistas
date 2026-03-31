@@ -22,6 +22,13 @@ model LojaCadastro {
   facebook      String?   @db.VarChar(100)
   area_loja     Float?
   vagas_estacionamento Int?
+  
+  // Integração Google Calendar
+  google_email         String?   @db.VarChar(255)
+  google_access_token  String?   @db.Text
+  google_refresh_token String?   @db.Text
+  google_expiry_date   BigInt?
+  google_calendar_id   String?   @db.VarChar(255)
 
   // Endereço separado por campo
   end_rua         String?  @db.VarChar(255)
