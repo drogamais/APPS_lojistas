@@ -67,6 +67,103 @@ model LojaCadastro {
   @@map("fat_loja_cadastro")
 }
 
+
+// ─── Campanhas ────────────────────────────────────────────────────────────
+
+model DimCampanha {
+  id               Int       @id @default(autoincrement())
+  nome             String    @db.VarChar(255)
+  data_inicio      DateTime?
+  data_fim         DateTime?
+  status           Int       @default(1)
+  data_atualizacao DateTime?
+  parceiro_id      Int?
+
+  produtos         DimCampanhaProduto[]
+
+  @@map("dim_campanha")
+}
+
+model DimCampanhaProduto {
+  id                        Int       @id @default(autoincrement())
+  campanha_id               Int
+  codigo_barras             String?   @db.VarChar(14)
+  codigo_barras_normalizado String?   @db.VarChar(16)
+  codigo_interno            String?   @db.VarChar(14)
+  descricao                 String?   @db.Text
+  pontuacao                 Int?
+  preco_normal              Decimal?  @db.Decimal(10, 2)
+  preco_desconto            Decimal?  @db.Decimal(10, 2)
+  rebaixe                   Decimal?  @db.Decimal(10, 2)
+  qtd_limite                Int?
+  data_atualizacao          DateTime?
+
+  campanha                  DimCampanha @relation(fields: [campanha_id], references: [id])
+
+  @@map("dim_campanha_produto")
+}
+
+// Tabelas silver — views/tabelas analíticas (sem FK gerenciada pelo Prisma,
+// pois são populadas por pipeline ETL externo)
+model SilverVendasCampanhas {
+  id_venda                              Int       @id @default(autoincrement())
+  cnpj_loja                             String?   @db.VarChar(14)
+  razao_social_loja                     String?   @db.VarChar(255)
+  cargo_colaborador                     String?   @db.VarChar(255)
+  nome_colaborador                      String?   @db.VarChar(255)
+  cpf_colaborador                       String?   @db.VarChar(11)
+  cnpj_fabricante                       String?   @db.VarChar(14)
+  razao_social_fabricante               String?   @db.VarChar(255)
+  nome_fantasia_fabricante              String?   @db.VarChar(255)
+  codigo_interno_produto                String?   @db.VarChar(50)
+  GTIN                                  String?   @db.VarChar(100)
+  codigo_de_barras_normalizado_produto  String?   @db.VarChar(50)
+  tipo_de_nota                          String?   @db.VarChar(100)
+  tipo_de_operacao                      String?   @db.VarChar(100)
+  tipo_de_pagamento                     String?   @db.VarChar(100)
+  qtd_clientes_atendidos                Int?
+  cmv_unitario                          Decimal?  @db.Decimal(15, 4)
+  cmv_total                             Decimal?  @db.Decimal(15, 4)
+  desconto_total                        Decimal?  @db.Decimal(15, 4)
+  qtd_de_produtos                       Int?
+  valor_bruto_total                     Decimal?  @db.Decimal(15, 4)
+  valor_bruto_unitario                  Decimal?  @db.Decimal(15, 4)
+  valor_liquido_total                   Decimal?  @db.Decimal(15, 4)
+  valor_liquido_unitario                Decimal?  @db.Decimal(15, 4)
+  data_venda                            DateTime?
+  id_campanha                           Int?
+  cod_interno_campanha                  String?   @db.VarChar(50)
+  gtin_campanha                         String?   @db.VarChar(50)
+  descricao_produto_campanha            String?   @db.VarChar(255)
+  pontos_campanha                       Int?
+  nome_campanha                         String?   @db.VarChar(255)
+  preco_normal_campanha                 Decimal?  @db.Decimal(20, 6)
+  preco_desconto_geral_campanha         Decimal?  @db.Decimal(20, 6)
+  rebaixe_campanha                      Decimal?  @db.Decimal(20, 6)
+  data_inicio_campanha                  DateTime?
+  data_fim_campanha                     DateTime?
+  status_campanha                       Int?
+  data_atualizacao                      DateTime?
+
+  @@map("silver_vendas_campanhas")
+}
+
+model SilverRankingCampanhas {
+  id_campanha            Int
+  nome_colaborador       String    @db.VarChar(255)
+  cnpj_loja              String    @db.VarChar(14)
+  ano_mes_referencia     String    @db.VarChar(7)
+  nome_campanha          String?   @db.VarChar(255)
+  id_grupo_historico     Int?
+  total_pontos           Int?
+  RK_Grupo_Campanha      Int?
+  data_fim_campanha      DateTime?
+  data_ultima_atualizacao DateTime?
+
+  @@id([id_campanha, nome_colaborador, cnpj_loja, ano_mes_referencia])
+  @@map("silver_ranking_campanhas")
+}
+
 model LojaBalconista {
   id           Int      @id @default(autoincrement())
   loja_id      Int

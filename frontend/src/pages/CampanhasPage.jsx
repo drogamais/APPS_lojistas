@@ -1,22 +1,50 @@
 import { useEffect, useState, useMemo } from 'react'
 import api from '../services/api.js'
 import {
-  BarChart2, Trophy, Award, TrendingUp, TrendingDown,
-  Minus, Filter, ChevronDown, Package, X, AlertCircle,
+  BarChart2, Trophy, Award, TrendingUp,
+  Filter, ChevronDown, Package, X, AlertCircle,
 } from 'lucide-react'
 
-// ─── Cores das medalhas ────────────────────────────────────────────────────
+// ─── Dicionário de Temas (White Label) ────────────────────────────────────
+const TEMAS = [
+  { chave: 'kenvue',    corPrimaria: '#16a34a', corSecundaria: '#bbf7d0', corTexto: '#14532d' },
+  { chave: 'eurofarma', corPrimaria: '#0369a1', corSecundaria: '#bae6fd', corTexto: '#0c4a6e' },
+  { chave: 'sanofi',    corPrimaria: '#7c3aed', corSecundaria: '#ede9fe', corTexto: '#4c1d95' },
+  { chave: 'pfizer',    corPrimaria: '#1d4ed8', corSecundaria: '#dbeafe', corTexto: '#1e3a8a' },
+  { chave: 'reckitt',   corPrimaria: '#b91c1c', corSecundaria: '#fee2e2', corTexto: '#7f1d1d' },
+]
+const TEMA_PADRAO = { corPrimaria: '#e8001c', corSecundaria: '#fee2e2', corTexto: '#7f1d1d' }
+
+function resolverTema(nomeCampanha) {
+  if (!nomeCampanha) return TEMA_PADRAO
+  const lower = nomeCampanha.toLowerCase()
+  return TEMAS.find(t => lower.includes(t.chave)) ?? TEMA_PADRAO
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────
+function formatarData(valor) {
+  if (!valor) return '—'
+  return new Date(valor).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+function formatarPontos(valor) {
+  if (valor == null) return '—'
+  return Number(valor).toLocaleString('pt-BR', { maximumFractionDigits: 0 })
+}
+
+function formatarMoeda(valor) {
+  if (valor == null) return '—'
+  return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+// ─── Medalhas ─────────────────────────────────────────────────────────────
 const MEDALHAS = [
   { cor: '#FFD700', label: '1º LUGAR', Icon: Trophy },
   { cor: '#C0C0C0', label: '2º LUGAR', Icon: Award  },
   { cor: '#CD7F32', label: '3º LUGAR', Icon: Award  },
 ]
 
-const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-               'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
-
 // ─── Subcomponentes ────────────────────────────────────────────────────────
-
 function SelectField({ label, value, onChange, options, placeholder = 'Todos' }) {
   return (
     <div className="space-y-1.5">
@@ -32,7 +60,7 @@ function SelectField({ label, value, onChange, options, placeholder = 'Todos' })
       >
         <option value="">{placeholder}</option>
         {options.map(o => (
-          <option key={o.value ?? o} value={o.value ?? o}>{o.label ?? o}</option>
+          <option key={o.value} value={o.value}>{o.label}</option>
         ))}
       </select>
     </div>
@@ -57,6 +85,14 @@ function ThemedThead({ cor, colunas }) {
   )
 }
 
+function EstadoVazio({ mensagem }) {
+  return (
+    <div className="text-center py-14 text-slate-400 text-sm font-bold select-none">
+      {mensagem}
+    </div>
+  )
+}
+
 function LoadingSkeleton() {
   return (
     <div className="space-y-4 animate-pulse">
@@ -70,29 +106,32 @@ function LoadingSkeleton() {
 }
 
 // ─── Página Principal ──────────────────────────────────────────────────────
-
 export default function CampanhasPage() {
   // ── Estado ──
-  const [campanhas, setCampanhas]             = useState([])
-  const [campanhaAtiva, setCampanhaAtiva]     = useState(null)
-  const [abaAtiva, setAbaAtiva]               = useState('principal')
-  const [ranking, setRanking]                 = useState({ catFiltro: null, lojaAtualNumero: null, ranking: [] })
-  const [vendas, setVendas]                   = useState([])
-  const [produtos, setProdutos]               = useState([])
+  const [campanhas,        setCampanhas]        = useState([])
+  const [campanhaAtiva,    setCampanhaAtiva]    = useState(null)
+  const [abaAtiva,         setAbaAtiva]         = useState('principal')
+  const [rankingData,      setRankingData]      = useState({ catFiltro: null, cnpjLogado: null, ranking: [] })
+  const [vendas,           setVendas]           = useState([])
+  const [produtos,         setProdutos]         = useState([])
   const [loadingCampanhas, setLoadingCampanhas] = useState(true)
-  const [loadingDados, setLoadingDados]       = useState(false)
-  const [error, setError]                     = useState(null)
-  const [filtroLoja, setFiltroLoja]           = useState('')
-  const [filtroMes, setFiltroMes]             = useState('')
-  const [filtroBalconista, setFiltroBalconista] = useState('')
+  const [loadingDados,     setLoadingDados]     = useState(false)
+  const [error,            setError]            = useState(null)
+  const [filtroColaborador, setFiltroColaborador] = useState('')
+  const [filtroMes,          setFiltroMes]        = useState('')
+
+  // ── Tema resolvido a partir do nome da campanha ──
+  const tema = useMemo(() => resolverTema(campanhaAtiva?.nome), [campanhaAtiva?.nome])
+  const cor  = tema.corPrimaria
 
   // ── Buscar lista de campanhas ao montar ──
   useEffect(() => {
     setLoadingCampanhas(true)
     api.get('/api/campanhas')
       .then(({ data }) => {
-        setCampanhas(data.campanhas ?? [])
-        if (data.campanhas?.length > 0) setCampanhaAtiva(data.campanhas[0])
+        const lista = data.campanhas ?? []
+        setCampanhas(lista)
+        if (lista.length > 0) setCampanhaAtiva(lista[0])
       })
       .catch(() => setError('Erro ao carregar a lista de campanhas.'))
       .finally(() => setLoadingCampanhas(false))
@@ -103,9 +142,8 @@ export default function CampanhasPage() {
     if (!campanhaAtiva) return
     setLoadingDados(true)
     setError(null)
-    setFiltroLoja('')
+    setFiltroColaborador('')
     setFiltroMes('')
-    setFiltroBalconista('')
 
     Promise.all([
       api.get(`/api/campanhas/${campanhaAtiva.id}/ranking`),
@@ -113,7 +151,7 @@ export default function CampanhasPage() {
       api.get(`/api/campanhas/${campanhaAtiva.id}/produtos`),
     ])
       .then(([r, v, p]) => {
-        setRanking(r.data)
+        setRankingData(r.data)
         setVendas(v.data.vendas ?? [])
         setProdutos(p.data.produtos ?? [])
       })
@@ -121,48 +159,57 @@ export default function CampanhasPage() {
       .finally(() => setLoadingDados(false))
   }, [campanhaAtiva?.id])
 
-  // ── Opções de filtros derivadas dos dados ──
-  const lojaOptions = useMemo(() => {
-    const rows = ranking.ranking ?? []
-    return [...new Set(rows.map(r => r.loja_numero))].sort()
-  }, [ranking])
-
-  const balconistaOptions = useMemo(() => {
-    return [...new Set(vendas.map(v => v.nomeFantasia))].sort()
-  }, [vendas])
+  // ── Opções de filtros ──
+  const colaboradorOptions = useMemo(() => {
+    const nomes = [...new Set(rankingData.ranking.map(r => r.nome_colaborador).filter(Boolean))].sort()
+    return nomes.map(n => ({ value: n, label: n }))
+  }, [rankingData.ranking])
 
   const mesOptions = useMemo(() => {
-    const presentes = new Set(vendas.map(v => v.mes))
-    return MESES.filter(m => presentes.has(m))
+    const meses = [...new Set(vendas.map(v => {
+      if (!v.data_venda) return null
+      const d = new Date(v.data_venda)
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    }).filter(Boolean))].sort()
+    return meses.map(m => {
+      const [ano, mes] = m.split('-')
+      const label = new Date(Number(ano), Number(mes) - 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+      return { value: m, label: label.charAt(0).toUpperCase() + label.slice(1) }
+    })
   }, [vendas])
 
   // ── Filtragem in-memory ──
   const rankingFiltrado = useMemo(() => {
-    const rows = ranking.ranking ?? []
-    if (!filtroLoja) return rows
-    return rows.filter(r => r.loja_numero === filtroLoja)
-  }, [ranking, filtroLoja])
+    const rows = rankingData.ranking ?? []
+    if (!filtroColaborador) return rows
+    return rows.filter(r => r.nome_colaborador === filtroColaborador)
+  }, [rankingData.ranking, filtroColaborador])
 
   const vendasFiltradas = useMemo(() => {
     return vendas.filter(v => {
-      if (filtroLoja && v.lojaNumero !== filtroLoja) return false
-      if (filtroMes  && v.mes       !== filtroMes)  return false
+      if (filtroMes && v.data_venda) {
+        const d = new Date(v.data_venda)
+        const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+        if (ym !== filtroMes) return false
+      }
+      if (filtroColaborador && v.nome_colaborador !== filtroColaborador) return false
       return true
     })
-  }, [vendas, filtroLoja, filtroMes])
+  }, [vendas, filtroMes, filtroColaborador])
 
-  const produtosFiltrados = useMemo(() => {
-    // TODO (mock): filtros de loja/balconista não têm dimensão em produtos
-    return produtos
-  }, [produtos])
-
-  const temFiltros = filtroLoja || filtroMes || filtroBalconista
-  const cor = campanhaAtiva?.corPrimaria
+  const temFiltros = filtroColaborador || filtroMes
 
   // ── Renderização ──
   if (loadingCampanhas) return (
-    <div className="max-w-7xl mx-auto pb-12 pt-2">
-      <LoadingSkeleton />
+    <div className="max-w-7xl mx-auto pb-12 pt-2"><LoadingSkeleton /></div>
+  )
+
+  if (!loadingCampanhas && campanhas.length === 0) return (
+    <div className="max-w-7xl mx-auto pb-12 flex flex-col items-center justify-center py-24 gap-4">
+      <BarChart2 size={48} className="text-slate-300 dark:text-slate-700" />
+      <p className="text-slate-500 dark:text-slate-400 font-bold text-sm">
+        Nenhuma campanha ativa no momento.
+      </p>
     </div>
   )
 
@@ -173,52 +220,57 @@ export default function CampanhasPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 p-4
                       bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800
                       shadow-[0_2px_12px_rgba(0,0,0,0.07)]">
-        <div>
-          <h1 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight flex items-center gap-3">
-            <BarChart2 size={24} className="text-drogamais-500" />
-            Dashboard de Campanhas
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">
-            Acompanhe seu desempenho nas campanhas ativas da rede.
-          </p>
-        </div>
-
-        {/* ── Seletor de Campanha ── */}
-        {campanhas.length > 0 && (
-          <div className="flex items-center gap-3 flex-wrap">
-            <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 whitespace-nowrap">
-              Campanha Ativa
-            </label>
-            <div className="relative">
-              <select
-                value={campanhaAtiva?.id ?? ''}
-                onChange={e => {
-                  const found = campanhas.find(c => c.id === Number(e.target.value))
-                  if (found) setCampanhaAtiva(found)
-                }}
-                className="appearance-none bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
-                           text-slate-800 dark:text-white font-bold text-sm rounded-xl px-4 pr-8 py-2.5
-                           shadow-sm focus:outline-none cursor-pointer"
-              >
-                {campanhas.map(c => (
-                  <option key={c.id} value={c.id}>{c.nome} — {c.periodo}</option>
-                ))}
-              </select>
-              <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-            </div>
-            {cor && (
-              <span
-                className="w-3 h-3 rounded-full shrink-0 border-2 border-white dark:border-slate-800 shadow"
-                style={{ backgroundColor: cor }}
-              />
+        <div className="flex items-center gap-3">
+          <div className="w-1.5 h-12 rounded-full shrink-0" style={{ backgroundColor: cor }} />
+          <div>
+            <h1 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight flex items-center gap-2">
+              <BarChart2 size={22} style={{ color: cor }} />
+              Dashboard de Campanhas
+            </h1>
+            {campanhaAtiva && (
+              <p className="text-xs font-bold mt-0.5" style={{ color: cor }}>
+                {campanhaAtiva.nome} •{' '}
+                <span className="text-slate-400 font-medium">
+                  {formatarData(campanhaAtiva.data_inicio)} – {formatarData(campanhaAtiva.data_fim)}
+                </span>
+              </p>
             )}
           </div>
-        )}
+        </div>
+
+        {/* Seletor de Campanha */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 whitespace-nowrap">
+            Campanha Ativa
+          </label>
+          <div className="relative">
+            <select
+              value={campanhaAtiva?.id ?? ''}
+              onChange={e => {
+                const found = campanhas.find(c => c.id === Number(e.target.value))
+                if (found) { setCampanhaAtiva(found); setAbaAtiva('principal') }
+              }}
+              className="appearance-none bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
+                         text-slate-800 dark:text-white font-bold text-sm rounded-xl px-4 pr-8 py-2.5
+                         shadow-sm focus:outline-none cursor-pointer min-w-[200px]"
+            >
+              {campanhas.map(c => (
+                <option key={c.id} value={c.id}>{c.nome}</option>
+              ))}
+            </select>
+            <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          </div>
+          <span
+            className="w-3 h-3 rounded-full shrink-0 border-2 border-white dark:border-slate-800 shadow"
+            style={{ backgroundColor: cor }}
+          />
+        </div>
       </div>
 
-      {/* ── Erro ── */}
+      {/* Erro de carregamento */}
       {error && (
-        <div className="flex items-center gap-3 p-4 mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-red-700 dark:text-red-400 text-sm font-bold">
+        <div className="flex items-center gap-3 p-4 mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800
+                        rounded-2xl text-red-700 dark:text-red-400 text-sm font-bold">
           <AlertCircle size={18} className="shrink-0" />
           {error}
         </div>
@@ -236,18 +288,10 @@ export default function CampanhasPage() {
             </h2>
 
             <SelectField
-              label="Loja"
-              value={filtroLoja}
-              onChange={setFiltroLoja}
-              options={lojaOptions.map(l => ({ value: l, label: l }))}
-              placeholder="Todas"
-            />
-
-            <SelectField
-              label="Balconista / Fantasia"
-              value={filtroBalconista}
-              onChange={setFiltroBalconista}
-              options={balconistaOptions.map(b => ({ value: b, label: b }))}
+              label="Colaborador"
+              value={filtroColaborador}
+              onChange={setFiltroColaborador}
+              options={colaboradorOptions}
               placeholder="Todos"
             />
 
@@ -255,13 +299,13 @@ export default function CampanhasPage() {
               label="Mês"
               value={filtroMes}
               onChange={setFiltroMes}
-              options={mesOptions.map(m => ({ value: m, label: m }))}
+              options={mesOptions}
               placeholder="Todos"
             />
 
             {temFiltros && (
               <button
-                onClick={() => { setFiltroLoja(''); setFiltroMes(''); setFiltroBalconista('') }}
+                onClick={() => { setFiltroColaborador(''); setFiltroMes('') }}
                 className="w-full py-2 text-[11px] font-black uppercase text-slate-400
                            hover:text-red-500 dark:hover:text-red-400 transition-colors
                            flex items-center justify-center gap-1.5"
@@ -270,10 +314,18 @@ export default function CampanhasPage() {
               </button>
             )}
 
-            {ranking.catFiltro && (
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Sua categoria</p>
-                <p className="text-xs font-black text-slate-700 dark:text-slate-200 mt-1">{ranking.catFiltro}</p>
+            {rankingData.catFiltro && (
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1">
+                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Sua categoria</p>
+                <p
+                  className="text-xs font-black px-2 py-1 rounded-lg inline-block"
+                  style={{ backgroundColor: tema.corSecundaria, color: tema.corTexto }}
+                >
+                  {rankingData.catFiltro}
+                </p>
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Apenas lojas desta categoria são exibidas no ranking.
+                </p>
               </div>
             )}
           </div>
@@ -283,11 +335,12 @@ export default function CampanhasPage() {
         <div className="flex-1 min-w-0">
 
           {/* ── Tab Bar ── */}
-          <div className="flex border-b border-slate-200 dark:border-slate-800 mb-5 bg-white dark:bg-slate-900 rounded-t-2xl overflow-hidden">
+          <div className="flex border-b border-slate-200 dark:border-slate-800 mb-5
+                          bg-white dark:bg-slate-900 rounded-t-2xl overflow-hidden">
             {[
-              { id: 'principal', label: 'Principal',          Icon: Trophy    },
+              { id: 'principal', label: 'Principal',          Icon: Trophy     },
               { id: 'vendas',    label: 'Vendas Gerais',       Icon: TrendingUp },
-              { id: 'produtos',  label: 'Pontuação Produtos',  Icon: Package   },
+              { id: 'produtos',  label: 'Produtos Pontuáveis', Icon: Package    },
             ].map(tab => {
               const isActive = abaAtiva === tab.id
               return (
@@ -298,7 +351,7 @@ export default function CampanhasPage() {
                   className={`relative flex items-center gap-2 px-4 py-3.5 text-[13px] font-bold
                               transition-colors select-none
                               ${isActive
-                                ? 'text-slate-900 dark:text-white'
+                                ? ''
                                 : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
                 >
                   <tab.Icon size={15} />
@@ -317,10 +370,12 @@ export default function CampanhasPage() {
           {/* ── Conteúdo das Abas ── */}
           {loadingDados ? (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
-              <div className="w-8 h-8 rounded-full border-4 border-slate-200 dark:border-slate-700 border-t-transparent animate-spin"
-                   style={{ borderTopColor: cor ?? '#64748b' }} />
+              <div
+                className="w-8 h-8 rounded-full border-4 border-slate-200 dark:border-slate-700 border-t-transparent animate-spin"
+                style={{ borderTopColor: cor }}
+              />
               <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 animate-pulse">
-                Carregando dados da campanha...
+                Carregando dados...
               </p>
             </div>
           ) : (
@@ -328,19 +383,17 @@ export default function CampanhasPage() {
               {/* ─── ABA: Principal (Ranking) ─── */}
               {abaAtiva === 'principal' && (
                 <div className="space-y-4">
-                  {/* Podium top 3 */}
                   {rankingFiltrado.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       {rankingFiltrado.slice(0, 3).map((entry, i) => {
                         const medalha = MEDALHAS[i]
                         if (!medalha) return null
-                        const isMinha = entry.loja_numero === ranking.lojaAtualNumero
                         return (
                           <div
-                            key={entry.posicao}
+                            key={i}
                             style={{
                               borderTopColor: medalha.cor,
-                              outline: isMinha ? `2px solid ${cor}` : 'none',
+                              outline: entry.e_minha_loja ? `2px solid ${cor}` : 'none',
                               outlineOffset: '2px',
                             }}
                             className="border-t-4 bg-white dark:bg-slate-900 rounded-2xl p-5
@@ -353,16 +406,18 @@ export default function CampanhasPage() {
                                 {medalha.label}
                               </span>
                             </div>
-                            <p className="text-[22px] font-black text-slate-800 dark:text-white mt-3">
-                              {entry.pontuacao.toLocaleString('pt-BR')}
+                            <p className="text-[22px] font-black text-slate-800 dark:text-white mt-3 tabular-nums">
+                              {formatarPontos(entry.total_pontos)}
                               <span className="text-xs font-semibold text-slate-400 ml-1">pts</span>
                             </p>
                             <p className="text-sm font-bold text-slate-600 dark:text-slate-300 truncate mt-1">
-                              {entry.nome_fantasia}
+                              {entry.nome_colaborador || '—'}
                             </p>
                             <div className="flex items-center justify-between mt-2">
-                              <span className="text-[11px] text-slate-400">{entry.loja_numero}</span>
-                              {isMinha && (
+                              <span className="text-[11px] text-slate-400 font-mono">
+                                {entry.cnpj_loja ?? '—'}
+                              </span>
+                              {entry.e_minha_loja && (
                                 <span
                                   style={{ backgroundColor: cor }}
                                   className="text-[9px] font-black text-white px-2 py-0.5 rounded-full"
@@ -377,52 +432,45 @@ export default function CampanhasPage() {
                     </div>
                   )}
 
-                  {/* Tabela restante */}
                   {rankingFiltrado.length === 0 ? (
-                    <div className="text-center py-12 text-slate-400 text-sm font-bold">
-                      Nenhuma loja encontrada para os filtros aplicados.
-                    </div>
+                    <EstadoVazio mensagem="Nenhum resultado encontrado para os filtros aplicados." />
                   ) : (
                     <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card">
                       <table className="w-full text-sm">
                         <ThemedThead cor={cor} colunas={[
-                          { label: 'Pos.',      align: 'center' },
-                          { label: 'Loja',      align: 'left'   },
-                          { label: 'Pontuação', align: 'right'  },
-                          { label: 'Var.',      align: 'center' },
+                          { label: 'Pos.',        align: 'center' },
+                          { label: 'Colaborador', align: 'left'   },
+                          { label: 'CNPJ Loja',   align: 'left'   },
+                          { label: 'Pontos',      align: 'right'  },
+                          { label: 'Período',     align: 'center' },
                         ]} />
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
-                          {rankingFiltrado.slice(3).map(entry => {
-                            const isMinha = entry.loja_numero === ranking.lojaAtualNumero
-                            return (
-                              <tr
-                                key={entry.posicao}
-                                className={`transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30
-                                            ${isMinha ? 'bg-slate-50 dark:bg-slate-800/20' : ''}`}
-                              >
-                                <td className="px-4 py-3 text-center tabular-nums font-black text-slate-500 w-12">
-                                  {entry.posicao}
-                                </td>
-                                <td className="px-4 py-3">
-                                  <div className="flex flex-col">
-                                    <span className={`font-bold text-slate-800 dark:text-slate-100 ${isMinha ? 'font-black' : ''}`}>
-                                      {entry.nome_fantasia}
-                                    </span>
-                                    <span className="text-[11px] text-slate-400">{entry.loja_numero}</span>
-                                  </div>
-                                </td>
-                                <td className="px-4 py-3 text-right font-black tabular-nums text-slate-800 dark:text-slate-100">
-                                  {entry.pontuacao.toLocaleString('pt-BR')}
-                                  <span className="text-[10px] font-normal text-slate-400 ml-1">pts</span>
-                                </td>
-                                <td className="px-4 py-3 text-center w-16">
-                                  {entry.variacao > 0 && <TrendingUp   size={14} className="text-emerald-500 mx-auto" />}
-                                  {entry.variacao < 0 && <TrendingDown  size={14} className="text-red-400 mx-auto"     />}
-                                  {entry.variacao === 0 && <Minus       size={14} className="text-slate-300 mx-auto"    />}
-                                </td>
-                              </tr>
-                            )
-                          })}
+                          {rankingFiltrado.slice(3).map((entry, i) => (
+                            <tr
+                              key={i}
+                              className={`transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30
+                                          ${entry.e_minha_loja ? 'bg-slate-50 dark:bg-slate-800/20' : ''}`}
+                            >
+                              <td className="px-4 py-3 text-center tabular-nums font-black text-slate-500 w-12">
+                                {entry.posicao}
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className={`font-bold text-slate-800 dark:text-slate-100 ${entry.e_minha_loja ? 'font-black' : ''}`}>
+                                  {entry.nome_colaborador || '—'}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 font-mono text-xs text-slate-500">
+                                {entry.cnpj_loja ?? '—'}
+                              </td>
+                              <td className="px-4 py-3 text-right font-black tabular-nums text-slate-800 dark:text-slate-100">
+                                {formatarPontos(entry.total_pontos)}
+                                <span className="text-[10px] font-normal text-slate-400 ml-1">pts</span>
+                              </td>
+                              <td className="px-4 py-3 text-center text-xs text-slate-400">
+                                {entry.ano_mes_referencia ?? '—'}
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -433,34 +481,46 @@ export default function CampanhasPage() {
               {/* ─── ABA: Vendas Gerais ─── */}
               {abaAtiva === 'vendas' && (
                 vendasFiltradas.length === 0 ? (
-                  <div className="text-center py-12 text-slate-400 text-sm font-bold">
-                    Nenhuma venda encontrada para os filtros aplicados.
-                  </div>
+                  <EstadoVazio mensagem="Nenhuma venda encontrada para os filtros aplicados." />
                 ) : (
                   <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card">
                     <table className="w-full text-sm">
                       <ThemedThead cor={cor} colunas={[
-                        { label: 'Mês',          align: 'left'   },
-                        { label: 'Loja',         align: 'left'   },
-                        { label: 'Fantasia',     align: 'left'   },
-                        { label: 'Total (R$)',   align: 'right'  },
-                        { label: 'Transações',   align: 'right'  },
-                        { label: 'Ticket Médio', align: 'right'  },
+                        { label: 'Data',        align: 'left'   },
+                        { label: 'Colaborador', align: 'left'   },
+                        { label: 'Cargo',       align: 'left'   },
+                        { label: 'GTIN',        align: 'left'   },
+                        { label: 'Produto',     align: 'left'   },
+                        { label: 'Qtd.',        align: 'right'  },
+                        { label: 'Pontos',      align: 'right'  },
+                        { label: 'Valor Líq.',  align: 'right'  },
                       ]} />
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
                         {vendasFiltradas.map((v, i) => (
                           <tr key={i} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30">
-                            <td className="px-4 py-3 font-bold text-slate-700 dark:text-slate-200 whitespace-nowrap">{v.mes}</td>
-                            <td className="px-4 py-3 text-slate-500 tabular-nums">{v.lojaNumero}</td>
-                            <td className="px-4 py-3 font-bold text-slate-800 dark:text-slate-100">{v.nomeFantasia}</td>
-                            <td className="px-4 py-3 text-right tabular-nums font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap">
-                              {v.totalVendas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-300">
+                              {formatarData(v.data_venda)}
+                            </td>
+                            <td className="px-4 py-3 font-bold text-slate-800 dark:text-slate-100">
+                              {v.nome_colaborador || '—'}
+                            </td>
+                            <td className="px-4 py-3 text-xs text-slate-500">
+                              {v.cargo_colaborador || '—'}
+                            </td>
+                            <td className="px-4 py-3 font-mono text-xs text-slate-400">
+                              {v.GTIN || '—'}
+                            </td>
+                            <td className="px-4 py-3 text-slate-700 dark:text-slate-200 max-w-[220px] truncate">
+                              {v.descricao_produto_campanha || '—'}
                             </td>
                             <td className="px-4 py-3 text-right tabular-nums text-slate-600 dark:text-slate-300">
-                              {v.qtdTransacoes.toLocaleString('pt-BR')}
+                              {v.qtd_de_produtos ?? '—'}
+                            </td>
+                            <td className="px-4 py-3 text-right tabular-nums font-bold text-slate-800 dark:text-slate-100">
+                              {formatarPontos(v.pontos_campanha)}
                             </td>
                             <td className="px-4 py-3 text-right tabular-nums text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                              {v.ticketMedio.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                              {formatarMoeda(v.valor_liquido_total)}
                             </td>
                           </tr>
                         ))}
@@ -470,41 +530,50 @@ export default function CampanhasPage() {
                 )
               )}
 
-              {/* ─── ABA: Pontuação Produtos ─── */}
+              {/* ─── ABA: Produtos Pontuáveis ─── */}
               {abaAtiva === 'produtos' && (
-                produtosFiltrados.length === 0 ? (
-                  <div className="text-center py-12 text-slate-400 text-sm font-bold">
-                    Nenhum produto encontrado.
-                  </div>
+                produtos.length === 0 ? (
+                  <EstadoVazio mensagem="Nenhum produto cadastrado nesta campanha." />
                 ) : (
                   <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card">
                     <table className="w-full text-sm">
                       <ThemedThead cor={cor} colunas={[
-                        { label: 'EAN',          align: 'left'   },
-                        { label: 'Descrição',    align: 'left'   },
-                        { label: 'Categoria',    align: 'left'   },
-                        { label: 'Pts/Unit.',    align: 'right'  },
-                        { label: 'Qtd. Vendida', align: 'right'  },
-                        { label: 'Total Pontos', align: 'right'  },
+                        { label: 'Cód. Barras',    align: 'left'   },
+                        { label: 'Descrição',      align: 'left'   },
+                        { label: 'Pontuação',      align: 'right'  },
+                        { label: 'Preço Normal',   align: 'right'  },
+                        { label: 'Preço c/ Desc.', align: 'right'  },
+                        { label: 'Rebaixe',        align: 'right'  },
+                        { label: 'Qtd. Limite',    align: 'right'  },
                       ]} />
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
-                        {produtosFiltrados.map((p, i) => (
+                        {produtos.map((p, i) => (
                           <tr key={i} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30">
-                            <td className="px-4 py-3 tabular-nums text-slate-400 font-mono text-xs">{p.ean}</td>
-                            <td className="px-4 py-3 font-bold text-slate-800 dark:text-slate-100">{p.descricao}</td>
-                            <td className="px-4 py-3">
-                              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full
-                                               bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                                {p.categoria}
-                              </span>
+                            <td className="px-4 py-3 font-mono text-xs text-slate-400">
+                              {p.codigo_barras_normalizado || p.codigo_barras || '—'}
                             </td>
-                            <td className="px-4 py-3 text-right tabular-nums font-bold text-slate-600 dark:text-slate-300">{p.pontosUnitario}</td>
-                            <td className="px-4 py-3 text-right tabular-nums text-slate-600 dark:text-slate-300">
-                              {p.qtdVendida.toLocaleString('pt-BR')}
+                            <td className="px-4 py-3 font-bold text-slate-800 dark:text-slate-100 max-w-[240px] truncate">
+                              {p.descricao || '—'}
                             </td>
                             <td className="px-4 py-3 text-right tabular-nums font-black text-slate-800 dark:text-slate-100">
-                              {p.totalPontos.toLocaleString('pt-BR')}
-                              <span className="text-[10px] font-normal text-slate-400 ml-1">pts</span>
+                              <span
+                                className="px-2 py-0.5 rounded-full text-[11px]"
+                                style={{ backgroundColor: tema.corSecundaria, color: tema.corTexto }}
+                              >
+                                {formatarPontos(p.pontuacao)} pts
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-right tabular-nums text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                              {formatarMoeda(p.preco_normal)}
+                            </td>
+                            <td className="px-4 py-3 text-right tabular-nums text-emerald-600 font-bold whitespace-nowrap">
+                              {formatarMoeda(p.preco_desconto)}
+                            </td>
+                            <td className="px-4 py-3 text-right tabular-nums text-slate-600 dark:text-slate-300">
+                              {p.rebaixe != null ? formatarMoeda(p.rebaixe) : '—'}
+                            </td>
+                            <td className="px-4 py-3 text-right tabular-nums text-slate-600 dark:text-slate-300">
+                              {p.qtd_limite ?? '—'}
                             </td>
                           </tr>
                         ))}
