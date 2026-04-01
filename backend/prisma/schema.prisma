@@ -11,6 +11,7 @@ model LojaCadastro {
   id            Int       @id @default(autoincrement())
   cnpj          String    @db.VarChar(14)
   loja_numero   Int?
+  cat           String?   @db.VarChar(50)
   nome_fantasia String    @db.VarChar(255)
   loja_completo String?   @db.VarChar(255)
   razao_social  String    @db.VarChar(255)

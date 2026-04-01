@@ -27,7 +27,7 @@ export async function runSync(onProgress) {
   try {
     const [lojas] = await db.query(`
       SELECT
-        cnpj_s, loja_numero, fantasia, razao_social, email,
+        cnpj_s, loja_numero, cat, fantasia, razao_social, email,
         telefone_fixo, celular, end_bairro, cep, cidade,
         end_complemento, end_numero, logradouro,
         pec_id_convenio, pec_cod_acesso
@@ -75,14 +75,15 @@ export async function runSync(onProgress) {
 
         await db.query(`
           INSERT INTO dbLojista.fat_loja_cadastro
-            (cnpj, loja_numero, nome_fantasia, loja_completo, razao_social, email,
+            (cnpj, loja_numero, cat, nome_fantasia, loja_completo, razao_social, email,
              senha_hash, telefone, whatsapp,
              end_bairro, end_cep, end_cidade, end_complemento, end_numero, end_rua,
              createdAt, updatedAt)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
           cnpj,
           loja.loja_numero     ?? null,
+          loja.cat             ?? null,
           loja.fantasia        ?? '',
           comp,
           loja.razao_social    ?? '',
@@ -112,6 +113,7 @@ export async function runSync(onProgress) {
           await db.query(`
             UPDATE dbLojista.fat_loja_cadastro SET
               loja_numero     = ?,
+              cat             = ?,
               nome_fantasia   = ?,
               loja_completo   = ?,
               razao_social    = ?,
@@ -129,6 +131,7 @@ export async function runSync(onProgress) {
             WHERE cnpj = ? AND deletedAt IS NULL
           `, [
             loja.loja_numero     ?? null,
+            loja.cat             ?? null,
             loja.fantasia        ?? '',
             comp,
             loja.razao_social    ?? '',
@@ -149,6 +152,7 @@ export async function runSync(onProgress) {
           await db.query(`
             UPDATE dbLojista.fat_loja_cadastro SET
               loja_numero     = ?,
+              cat             = ?,
               nome_fantasia   = ?,
               loja_completo   = ?,
               razao_social    = ?,
@@ -165,6 +169,7 @@ export async function runSync(onProgress) {
             WHERE cnpj = ? AND deletedAt IS NULL
           `, [
             loja.loja_numero     ?? null,
+            loja.cat             ?? null,
             loja.fantasia        ?? '',
             comp,
             loja.razao_social    ?? '',

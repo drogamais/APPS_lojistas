@@ -93,6 +93,7 @@ const SAFE_SELECT = {
   dom_abre:  true,
   dom_fecha: true,
   google_email:         true,
+  cat:                  true,
   createdAt:            true,
   updatedAt:            true,
 }

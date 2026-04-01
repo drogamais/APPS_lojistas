@@ -404,6 +404,11 @@ export default function PerfilPage() {
           <Building2 size={16} className="text-drogamais-500" /> 
           CNPJ: <span className="font-mono font-bold">{perfil?.cnpj}</span>
           {perfil?.loja_numero && ` • Loja nº ${perfil.loja_numero}`}
+          {perfil?.cat && (
+            <span className="ml-2 px-2 py-0.5 bg-drogamais-500/10 text-drogamais-600 dark:text-drogamais-400 text-[10px] font-black uppercase tracking-widest rounded-full border border-drogamais-500/20">
+              CAT: {perfil.cat}
+            </span>
+          )}
         </p>
       </div>
 
