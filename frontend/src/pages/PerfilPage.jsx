@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import api from '../services/api.js'
-import { Clock, MapPin, Building2, Smartphone, Save, Maximize, Car, Facebook, Calendar, Check, Link } from 'lucide-react'
+import { Clock, MapPin, Building2, Smartphone, Save, Maximize, Car, Facebook, Calendar, Check, Link, RefreshCw, ChevronDown, Search } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext.jsx'
 
 const formatPhone = (val) => {
   if (!val) return '';
@@ -54,20 +55,36 @@ export default function PerfilPage() {
   const [form, setForm]       = useState({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving]   = useState(false)
+  const [syncing, setSyncing] = useState(false)
+  const [syncProgress, setSyncProgress] = useState({ current: 0, total: 0 })
   const [msg, setMsg]         = useState(null)
   const [googleStatus, setGoogleStatus] = useState({ connected: false, email: '' })
+  
+  // Busca Admin
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [searchTerm, setSearchTerm]         = useState('')
+  const dropdownRef = useRef(null)
+  
+  const { isAdmin } = useAuth()
+  const [lojas, setLojas] = useState([])
+  const [selectedLojaId, setSelectedLojaId] = useState(null)
 
   useEffect(() => {
     async function load() {
+      setLoading(true)
       try {
-        const [pRes, gRes] = await Promise.all([
-          api.get('/api/loja/perfil'),
-          api.get('/api/google/status').catch(() => ({ data: { connected: false } }))
+        const queryParams = selectedLojaId ? `?loja_id=${selectedLojaId}` : ''
+        
+        const [pRes, gRes, lRes] = await Promise.all([
+          api.get(`/api/loja/perfil${queryParams}`),
+          api.get(`/api/google/status${queryParams}`).catch(() => ({ data: { connected: false } })),
+          isAdmin ? api.get('/api/admin/lojas').catch(() => ({ data: [] })) : Promise.resolve({ data: [] })
         ])
         
         const data = pRes.data
         setPerfil(data)
         setGoogleStatus(gRes.data)
+        if (isAdmin && lRes.data) setLojas(lRes.data)
 
         const initialForm = {
           nome_fantasia:   data.nome_fantasia ?? '',
@@ -83,7 +100,7 @@ export default function PerfilPage() {
           end_numero:      data.end_numero ?? '',
           end_bairro:      data.end_bairro ?? '',
           end_cidade:      data.end_cidade ?? '',
-          end_uf:          data.end_uf ?? '',
+          end_uf:          data.end_uf || 'PR', // Força PR se vazio
           end_cep:         data.end_cep ?? '',
           end_complemento: data.end_complemento ?? '',
         };
@@ -106,7 +123,25 @@ export default function PerfilPage() {
       }
     }
     load()
+  }, [selectedLojaId, isAdmin])
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
+
+  useEffect(() => {
+    if (isAdmin) {
+      api.get('/api/admin/lojas').then(res => {
+        setLojas(res.data)
+      }).catch(console.error)
+    }
+  }, [isAdmin])
 
   const handleGoogleConnect = () => {
     window.location.href = `${import.meta.env.VITE_API_URL}/api/google/auth`
@@ -155,6 +190,45 @@ export default function PerfilPage() {
     }));
   }
 
+  async function handleSync() {
+    if (!confirm('Tem certeza que deseja executar a sincronização agora? Isso pode levar alguns segundos.')) return
+    
+    setSyncing(true)
+    setSyncProgress({ current: 0, total: 0 })
+    setMsg(null)
+
+    // Polling do progresso real
+    const pollInterval = setInterval(async () => {
+      try {
+        const { data } = await api.get('/api/admin/sync/status')
+        if (data.active) {
+          setSyncProgress({ current: data.current, total: data.total })
+        }
+      } catch (e) { /* ignore */ }
+    }, 600)
+
+    try {
+      const res = await api.post('/api/admin/sync')
+      clearInterval(pollInterval)
+      setSyncProgress({ current: res.data.stats.updated + res.data.stats.inserted + res.data.stats.skipped, total: res.data.stats.updated + res.data.stats.inserted + res.data.stats.skipped })
+      setMsg({ type: 'success', text: `Sincronização concluída! Inseridos: ${res.data.stats.inserted}, Atualizados: ${res.data.stats.updated}` })
+      
+      if (isAdmin) {
+        const queryParams = selectedLojaId ? `?loja_id=${selectedLojaId}` : ''
+        const pRes = await api.get(`/api/loja/perfil${queryParams}`)
+        setPerfil(pRes.data)
+      }
+    } catch (err) {
+      clearInterval(pollInterval)
+      setMsg({ type: 'error', text: 'Erro ao sincronizar lojas.' })
+    } finally {
+      setTimeout(() => {
+        setSyncing(false)
+        setSyncProgress({ current: 0, total: 0 })
+      }, 2000)
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
     setMsg(null)
@@ -181,6 +255,7 @@ export default function PerfilPage() {
     
     const submitData = {
       ...form,
+      loja_id: selectedLojaId, // Envia o ID se for admin editando outra loja
       telefone: form.telefone?.replace(/\D/g, ''),
       whatsapp: form.whatsapp?.replace(/\D/g, ''),
       area_loja: form.area_loja ? parseFloat(form.area_loja) : null,
@@ -229,6 +304,100 @@ export default function PerfilPage() {
 
   return (
     <div className="max-w-3xl mx-auto pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {isAdmin && (
+        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-drogamais-500/5 dark:bg-drogamais-500/10 border border-drogamais-500/20 rounded-2xl">
+          <div className="flex-1 relative" ref={dropdownRef}>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-drogamais-600 dark:text-drogamais-400 mb-1.5 ml-1">Gerir Unidade (Admin)</label>
+            
+            <div 
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="w-full bg-white dark:bg-slate-900 border border-drogamais-500/30 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-white flex items-center justify-between cursor-pointer shadow-sm hover:border-drogamais-500/60 transition-all select-none"
+            >
+              <span className="truncate">
+                {selectedLojaId ? lojas.find(l => l.id == selectedLojaId)?.loja_completo : 'Minha Loja Principal'}
+              </span>
+              <ChevronDown className={`text-drogamais-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} size={18} />
+            </div>
+
+            {isDropdownOpen && (
+              <div className="absolute top-full left-0 w-full mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-[100] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                <div className="p-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </div>
+                    <input 
+                      autoFocus
+                      type="text"
+                      placeholder="Pesquisar por número ou nome..."
+                      value={searchTerm || ''}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full bg-white dark:bg-slate-800 border-none rounded-lg pl-9 pr-4 py-2 text-xs font-bold text-slate-700 dark:text-white focus:ring-2 focus:ring-drogamais-500/20 outline-none"
+                    />
+                  </div>
+                </div>
+                <div className="max-h-[300px] overflow-y-auto p-1 py-2 custom-scrollbar">
+                  <div 
+                    onClick={() => { setSelectedLojaId(null); setIsDropdownOpen(false); setSearchTerm('') }}
+                    className={`px-4 py-2.5 mx-1 rounded-lg text-xs font-bold cursor-pointer transition-colors ${!selectedLojaId ? 'bg-drogamais-500 text-white' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
+                  >
+                    Minha Loja Principal
+                  </div>
+                  <div className="h-px bg-slate-100 dark:bg-slate-800 my-1 mx-4" />
+                  {(Array.isArray(lojas) ? lojas : []).filter(l => {
+                    const search = (searchTerm || '').toLowerCase();
+                    const full = (l.loja_completo || '').toLowerCase();
+                    const fant = (l.nome_fantasia || '').toLowerCase();
+                    return full.includes(search) || fant.includes(search);
+                  }).map(l => (
+                    <div 
+                      key={l.id} 
+                      onClick={() => { setSelectedLojaId(l.id); setIsDropdownOpen(false); setSearchTerm('') }}
+                      className={`px-4 py-2.5 mx-1 rounded-lg text-xs font-bold cursor-pointer transition-colors ${selectedLojaId == l.id ? 'bg-drogamais-500 text-white' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
+                    >
+                      {l.loja_completo || l.nome_fantasia || `Loja #${l.loja_numero}`}
+                    </div>
+                  ))}
+                  {(Array.isArray(lojas) ? lojas : []).filter(l => {
+                    const search = (searchTerm || '').toLowerCase();
+                    const full = (l.loja_completo || '').toLowerCase();
+                    const fant = (l.nome_fantasia || '').toLowerCase();
+                    return full.includes(search) || fant.includes(search);
+                  }).length === 0 && (
+                    <div className="px-4 py-8 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Nenhuma loja encontrada</div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <button
+            type="button"
+            onClick={handleSync}
+            disabled={syncing}
+            className="relative flex flex-col items-center justify-center gap-1 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-drogamais-600 dark:text-drogamais-400 text-xs font-black px-6 py-3 rounded-xl border border-drogamais-500/30 transition-all shadow-sm disabled:opacity-80 min-w-[200px]"
+          >
+            <div className="flex items-center gap-2">
+              <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
+              {syncing ? 'SINCRONIZANDO...' : 'SINCRONIZAR LOJAS'}
+            </div>
+            {syncing && (
+              <div className="absolute bottom-0 left-0 w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-b-xl overflow-hidden">
+                <div 
+                  className="h-full bg-drogamais-500 transition-all duration-300 ease-out" 
+                  style={{ width: `${syncProgress.total > 0 ? (syncProgress.current / syncProgress.total) * 100 : 0}%` }}
+                />
+              </div>
+            )}
+            {syncing && syncProgress.total > 0 && (
+              <span className="text-[9px] font-bold text-drogamais-400 mt-1">
+                {syncProgress.current} / {syncProgress.total} lojas
+              </span>
+            )}
+          </button>
+        </div>
+      )}
+
       <div className="mb-8 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-[0_2px_12px_rgba(0,0,0,0.07)]">
         <h1 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">Perfil da Loja</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
@@ -291,15 +460,15 @@ export default function PerfilPage() {
           <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-5">
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1.5">
-                Telefone <span className="text-[9px] font-black text-drogamais-400 bg-drogamais-50 dark:bg-drogamais-500/10 px-1.5 py-0.5 rounded-full tracking-wider normal-case">sincronizado</span>
+                Telefone
               </label>
-              <input type="text" name="telefone" value={form.telefone ?? ''} readOnly className="w-full bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-500 dark:text-slate-400 cursor-default select-all font-mono" />
+              <input type="text" name="telefone" value={form.telefone ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 font-mono" />
             </div>
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1.5">
-                WhatsApp <span className="text-[9px] font-black text-drogamais-400 bg-drogamais-50 dark:bg-drogamais-500/10 px-1.5 py-0.5 rounded-full tracking-wider normal-case">sincronizado</span>
+                WhatsApp
               </label>
-              <input type="text" name="whatsapp" value={form.whatsapp ?? ''} readOnly className="w-full bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-500 dark:text-slate-400 cursor-default select-all font-mono" />
+              <input type="text" name="whatsapp" value={form.whatsapp ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 font-mono" />
             </div>
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Instagram</label>
@@ -350,7 +519,7 @@ export default function PerfilPage() {
             </div>
             <div className="sm:col-span-1 space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">UF</label>
-              <input type="text" name="end_uf" value={form.end_uf ?? ''} onChange={handleChange} maxLength="2" placeholder="SP" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 uppercase text-center" />
+              <input type="text" name="end_uf" value={form.end_uf ?? 'PR'} readOnly className="w-full bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-500 dark:text-slate-400 cursor-default uppercase text-center" />
             </div>
           </div>
         </section>

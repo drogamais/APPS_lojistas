@@ -12,6 +12,7 @@ model LojaCadastro {
   cnpj          String    @db.VarChar(14)
   loja_numero   Int?
   nome_fantasia String    @db.VarChar(255)
+  loja_completo String?   @db.VarChar(255)
   razao_social  String    @db.VarChar(255)
   email         String    @unique @db.VarChar(255)
   senha_hash    String    @db.VarChar(255)

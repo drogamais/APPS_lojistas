@@ -8,6 +8,7 @@ export default function AdminHomePage() {
   const [links, setLinks] = useState([])
   const [avisos, setAvisos] = useState([])
   const [promocoes, setPromocoes] = useState([])
+  const [admins, setAdmins] = useState([])
   const [loading, setLoading] = useState(true)
   
   // Abas e KanBan
@@ -23,10 +24,16 @@ export default function AdminHomePage() {
 
   const fetchData = () => {
     setLoading(true)
-    api.get('/api/home?all=true').then(({ data }) => {
-      setLinks(data.links || [])
-      setAvisos(data.avisos || [])
-      setPromocoes(data.promocoes || [])
+    const promises = [
+      api.get('/api/home?all=true'),
+      api.get('/api/admin/users').catch(() => ({ data: [] }))
+    ]
+    
+    Promise.all(promises).then(([homeRes, adminRes]) => {
+      setLinks(homeRes.data.links || [])
+      setAvisos(homeRes.data.avisos || [])
+      setPromocoes(homeRes.data.promocoes || [])
+      setAdmins(adminRes.data || [])
     }).finally(() => setLoading(false))
   }
 
@@ -116,19 +123,29 @@ export default function AdminHomePage() {
       setEditForm({ titulo: '', url: 'https://', icone_nome: 'Link', ativo: true, data_expiracao_input: '' })
     } else if (type === 'avisos') {
       setEditForm({ titulo: '', descricao_ou_imagem: '', ativo: true, data_expiracao_input: '' })
-    } else {
+    } else if (type === 'promocoes') {
       setEditForm({ titulo: '', imagem_url: '', url_destino: '', ativo: true, data_expiracao_input: '' })
+    } else if (type === 'admins') {
+      setEditForm({ nome: '', email: '', senha: '' })
     }
   }
 
   const handleDelete = async (type, id) => {
     if (!window.confirm("Deseja realmente excluir permanentemente?")) return
     try {
-      await api.delete(`/api/admin/home/${type}/${id}`)
-      if (type === 'links') setLinks(links.filter(i => i.id !== id))
-      else if (type === 'avisos') setAvisos(avisos.filter(i => i.id !== id))
-      else setPromocoes(promocoes.filter(i => i.id !== id))
-    } catch { alert("Erro ao remover") }
+      if (type === 'admins') {
+        await api.delete(`/api/admin/users/${id}`)
+        setAdmins(admins.filter(i => i.id !== id))
+      } else {
+        await api.delete(`/api/admin/home/${type}/${id}`)
+        if (type === 'links') setLinks(links.filter(i => i.id !== id))
+        else if (type === 'avisos') setAvisos(avisos.filter(i => i.id !== id))
+        else setPromocoes(promocoes.filter(i => i.id !== id))
+      }
+    } catch (err) { 
+      const errorMsg = err.response?.data?.error || "Erro ao remover"
+      alert(errorMsg)
+    }
   }
 
   const openEdit = (type, item) => {
@@ -144,30 +161,38 @@ export default function AdminHomePage() {
   const saveEdit = async () => {
     try {
       const { id, type } = editingItem
-      const payload = {
-        titulo: editForm.titulo,
-        ativo: editForm.ativo,
-        data_expiracao: editForm.data_expiracao_input ? new Date(editForm.data_expiracao_input).toISOString() : null
-      }
-
-      if (type === 'links') {
-        payload.url = editForm.url
-        payload.icone_nome = editForm.icone_nome
-      } else if (type === 'avisos') {
-        payload.descricao_ou_imagem = editForm.descricao_ou_imagem
+      
+      if (type === 'admins') {
+        await api.post('/api/admin/users', editForm)
       } else {
-        payload.imagem_url = editForm.imagem_url
-        payload.url_destino = editForm.url_destino
-      }
+        const payload = {
+          titulo: editForm.titulo,
+          ativo: editForm.ativo,
+          data_expiracao: editForm.data_expiracao_input ? new Date(editForm.data_expiracao_input).toISOString() : null
+        }
 
-      if (id === null) {
-        await api.post(`/api/admin/home/${type}`, payload)
-      } else {
-        await api.put(`/api/admin/home/${type}/${id}`, payload)
+        if (type === 'links') {
+          payload.url = editForm.url
+          payload.icone_nome = editForm.icone_nome
+        } else if (type === 'avisos') {
+          payload.descricao_ou_imagem = editForm.descricao_ou_imagem
+        } else {
+          payload.imagem_url = editForm.imagem_url
+          payload.url_destino = editForm.url_destino
+        }
+
+        if (id === null) {
+          await api.post(`/api/admin/home/${type}`, payload)
+        } else {
+          await api.put(`/api/admin/home/${type}/${id}`, payload)
+        }
       }
       setEditingItem(null)
       fetchData()
-    } catch { alert("Erro ao salvar") }
+    } catch (err) { 
+      const errorMsg = err.response?.data?.error || "Erro ao salvar"
+      alert(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg)
+    }
   }
 
   const formatExpMsg = (iso) => {
@@ -225,6 +250,47 @@ export default function AdminHomePage() {
     </Draggable>
   )
 
+  const renderAdminList = () => (
+    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+              <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Nome</th>
+              <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">E-mail</th>
+              <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">CNPJ</th>
+              <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Criado em</th>
+              <th className="px-6 py-4 text-right"></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            {admins.map(admin => (
+              <tr key={admin.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                <td className="px-6 py-4 text-sm font-bold text-slate-700 dark:text-slate-200">{admin.nome_fantasia}</td>
+                <td className="px-6 py-4 text-sm font-medium text-slate-500 dark:text-slate-400">{admin.email}</td>
+                <td className="px-6 py-4 text-xs font-mono text-slate-400 dark:text-slate-500">{admin.cnpj || '-'}</td>
+                <td className="px-6 py-4 text-xs text-slate-400 dark:text-slate-500">{new Date(admin.createdAt).toLocaleDateString('pt-BR')}</td>
+                <td className="px-6 py-4 text-right">
+                  {admin.email !== 'admin@drogamais.com' && (
+                    <button 
+                      onClick={() => handleDelete('admins', admin.id)}
+                      className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {admins.length === 0 && (
+        <div className="p-12 text-center text-slate-400 italic text-sm">Nenhum administrador encontrado.</div>
+      )}
+    </div>
+  )
+
   if (loading) return <p className="text-slate-500 dark:text-slate-400 p-8 animate-pulse italic">Carregando painel de administração...</p>
 
   // Listas da aba atual
@@ -246,7 +312,7 @@ export default function AdminHomePage() {
           className="bg-drogamais-500 hover:bg-drogamais-600 text-white font-bold px-5 py-3 rounded-xl flex items-center gap-2 transition hover:scale-105 active:scale-95 shadow-lg shadow-drogamais-500/20"
         >
           <Plus size={18} strokeWidth={3} /> 
-          Novo {activeTab === 'links' ? 'SISTEMA' : activeTab === 'promocoes' ? 'BANNER' : 'AVISO'}
+          Novo {activeTab === 'links' ? 'SISTEMA' : activeTab === 'promocoes' ? 'BANNER' : activeTab === 'avisos' ? 'AVISO' : 'ADMINISTRADOR'}
         </button>
       </div>
 
@@ -255,7 +321,8 @@ export default function AdminHomePage() {
         {[
           { id: 'promocoes', label: 'Banners de Promoção' },
           { id: 'links', label: 'Carrossel de Sistemas' },
-          { id: 'avisos', label: 'Mural de Avisos' }
+          { id: 'avisos', label: 'Mural de Avisos' },
+          { id: 'admins', label: 'Gestão de Admins' }
         ].map(tab => (
           <button
             key={tab.id}
@@ -270,60 +337,61 @@ export default function AdminHomePage() {
         ))}
       </div>
 
-      {/* ── MESA KANBAN (DRAG AND DROP) ── */}
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-          
-          {/* COLUNA 1: ATIVOS NA TELA */}
-          <div className="bg-slate-50 dark:bg-slate-900 rounded-[24px] border border-slate-200 dark:border-slate-800 shadow-inner flex flex-col h-[65vh] min-h-[500px]">
-            <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-t-[24px] flex items-center justify-between shadow-sm">
-              <h2 className="font-black text-slate-800 dark:text-white flex items-center gap-2 text-xs tracking-widest uppercase">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
-                Visíveis na Home
-              </h2>
-              <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2.5 py-1 rounded-full font-black tabular-nums border border-slate-200 dark:border-slate-700">{listAtivos.length}</span>
+      {activeTab === 'admins' ? renderAdminList() : (
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+            
+            {/* COLUNA 1: ATIVOS NA TELA */}
+            <div className="bg-slate-50 dark:bg-slate-900 rounded-[24px] border border-slate-200 dark:border-slate-800 shadow-inner flex flex-col h-[65vh] min-h-[500px]">
+              <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-t-[24px] flex items-center justify-between shadow-sm">
+                <h2 className="font-black text-slate-800 dark:text-white flex items-center gap-2 text-xs tracking-widest uppercase">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
+                  Visíveis na Home
+                </h2>
+                <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2.5 py-1 rounded-full font-black tabular-nums border border-slate-200 dark:border-slate-700">{listAtivos.length}</span>
+              </div>
+              <Droppable droppableId="zone-ativos" direction="vertical">
+                {(provided, snapshot) => (
+                  <div 
+                    {...provided.droppableProps} 
+                    ref={provided.innerRef} 
+                    className={`p-4 flex-1 overflow-y-auto transition-colors ${snapshot.isDraggingOver ? 'bg-emerald-50/50 dark:bg-emerald-950/20' : ''}`}
+                  >
+                    {listAtivos.map((item, index) => renderItemCard(item, index, activeTab))}
+                    {provided.placeholder}
+                    {listAtivos.length === 0 && <p className="text-xs text-center py-12 text-slate-400 dark:text-slate-600 italic font-medium">Nenhum item visível. Arraste para cá.</p>}
+                  </div>
+                )}
+              </Droppable>
             </div>
-            <Droppable droppableId="zone-ativos" direction="vertical">
-              {(provided, snapshot) => (
-                <div 
-                  {...provided.droppableProps} 
-                  ref={provided.innerRef} 
-                  className={`p-4 flex-1 overflow-y-auto transition-colors ${snapshot.isDraggingOver ? 'bg-emerald-50/50 dark:bg-emerald-950/20' : ''}`}
-                >
-                  {listAtivos.map((item, index) => renderItemCard(item, index, activeTab))}
-                  {provided.placeholder}
-                  {listAtivos.length === 0 && <p className="text-xs text-center py-12 text-slate-400 dark:text-slate-600 italic font-medium">Nenhum item visível. Arraste para cá.</p>}
-                </div>
-              )}
-            </Droppable>
-          </div>
 
-          {/* COLUNA 2: OCULTOS / EXPIRADOS */}
-          <div className="bg-slate-50/70 dark:bg-slate-900/40 rounded-[24px] border border-slate-200 dark:border-slate-800/60 shadow-inner flex flex-col h-[65vh] min-h-[500px]">
-            <div className="p-4 border-b border-slate-200 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 rounded-t-[24px] flex items-center justify-between shadow-sm">
-              <h2 className="font-black text-slate-400 dark:text-slate-600 flex items-center gap-2 text-xs tracking-widest uppercase">
-                <span className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-700"></span>
-                Geladeira (Ocultos)
-              </h2>
-              <span className="text-[10px] bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-500 px-2.5 py-1 rounded-full font-black tabular-nums border border-slate-200/60 dark:border-slate-700">{listOcultos.length}</span>
+            {/* COLUNA 2: OCULTOS / EXPIRADOS */}
+            <div className="bg-slate-50/70 dark:bg-slate-900/40 rounded-[24px] border border-slate-200 dark:border-slate-800/60 shadow-inner flex flex-col h-[65vh] min-h-[500px]">
+              <div className="p-4 border-b border-slate-200 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 rounded-t-[24px] flex items-center justify-between shadow-sm">
+                <h2 className="font-black text-slate-400 dark:text-slate-600 flex items-center gap-2 text-xs tracking-widest uppercase">
+                  <span className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-700"></span>
+                  Geladeira (Ocultos)
+                </h2>
+                <span className="text-[10px] bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-500 px-2.5 py-1 rounded-full font-black tabular-nums border border-slate-200/60 dark:border-slate-700">{listOcultos.length}</span>
+              </div>
+              <Droppable droppableId="zone-ocultos" direction="vertical">
+                {(provided, snapshot) => (
+                  <div 
+                    {...provided.droppableProps} 
+                    ref={provided.innerRef} 
+                    className={`p-4 flex-1 overflow-y-auto transition-colors ${snapshot.isDraggingOver ? 'bg-red-50/30 dark:bg-red-950/20' : ''}`}
+                  >
+                    {listOcultos.map((item, index) => renderItemCard(item, index, activeTab))}
+                    {provided.placeholder}
+                    {listOcultos.length === 0 && <p className="text-xs text-center py-12 text-slate-400 dark:text-slate-600 italic font-medium">Geladeira vazia.</p>}
+                  </div>
+                )}
+              </Droppable>
             </div>
-            <Droppable droppableId="zone-ocultos" direction="vertical">
-              {(provided, snapshot) => (
-                <div 
-                  {...provided.droppableProps} 
-                  ref={provided.innerRef} 
-                  className={`p-4 flex-1 overflow-y-auto transition-colors ${snapshot.isDraggingOver ? 'bg-red-50/30 dark:bg-red-950/20' : ''}`}
-                >
-                  {listOcultos.map((item, index) => renderItemCard(item, index, activeTab))}
-                  {provided.placeholder}
-                  {listOcultos.length === 0 && <p className="text-xs text-center py-12 text-slate-400 dark:text-slate-600 italic font-medium">Geladeira vazia.</p>}
-                </div>
-              )}
-            </Droppable>
-          </div>
 
-        </div>
-      </DragDropContext>
+          </div>
+        </DragDropContext>
+      )}
 
       {/* MODAL DE EDIÇÃO */}
       {editingItem && (
@@ -342,54 +410,73 @@ export default function AdminHomePage() {
             </div>
             
             <div className="space-y-5 max-h-[60vh] overflow-y-auto px-1">
-              <div className="space-y-1.5">
-                <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Título do Card</label>
-                <input 
-                  value={editForm.titulo || ''} 
-                  onChange={e => setEditForm({...editForm, titulo: e.target.value})}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-drogamais-500/20 outline-none transition-all" 
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Ocultação Automática</label>
-                <input 
-                  type="datetime-local"
-                  value={editForm.data_expiracao_input || ''} 
-                  onChange={e => setEditForm({...editForm, data_expiracao_input: e.target.value})}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-drogamais-500/20 outline-none transition-all" 
-                />
-                <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 px-1 mt-1 leading-relaxed">Se agendado, o card pulará para a "Geladeira" no horário definido.</p>
-              </div>
-
-              {activeTab === 'links' && (
+              {activeTab === 'admins' ? (
                 <>
                   <div className="space-y-1.5">
-                    <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">URL do Parceiro</label>
-                    <input value={editForm.url || ''} onChange={e => setEditForm({...editForm, url: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
+                    <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nome Completo</label>
+                    <input value={editForm.nome || ''} onChange={e => setEditForm({...editForm, nome: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nome do Ícone Lucide</label>
-                    <input value={editForm.icone_nome || ''} onChange={e => setEditForm({...editForm, icone_nome: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" placeholder="Ex: Star, Truck, Mail" />
+                    <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">E-mail de Acesso</label>
+                    <input type="email" value={editForm.email || ''} onChange={e => setEditForm({...editForm, email: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Senha Inicial</label>
+                    <input type="password" value={editForm.senha || ''} onChange={e => setEditForm({...editForm, senha: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
                   </div>
                 </>
-              )}
-              {activeTab === 'avisos' && (
-                <div className="space-y-1.5">
-                  <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Mensagem do Aviso</label>
-                  <textarea value={editForm.descricao_ou_imagem || ''} onChange={e => setEditForm({...editForm, descricao_ou_imagem: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-medium text-slate-800 dark:text-white min-h-[120px] outline-none" />
-                </div>
-              )}
-              {activeTab === 'promocoes' && (
+              ) : (
                 <>
                   <div className="space-y-1.5">
-                    <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">URL da Imagem Banner</label>
-                    <input value={editForm.imagem_url || ''} onChange={e => setEditForm({...editForm, imagem_url: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
+                    <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Título do Card</label>
+                    <input 
+                      value={editForm.titulo || ''} 
+                      onChange={e => setEditForm({...editForm, titulo: e.target.value})}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-drogamais-500/20 outline-none transition-all" 
+                    />
                   </div>
+
                   <div className="space-y-1.5">
-                    <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Link de Destino</label>
-                    <input value={editForm.url_destino || ''} onChange={e => setEditForm({...editForm, url_destino: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
+                    <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Ocultação Automática</label>
+                    <input 
+                      type="datetime-local"
+                      value={editForm.data_expiracao_input || ''} 
+                      onChange={e => setEditForm({...editForm, data_expiracao_input: e.target.value})}
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-drogamais-500/20 outline-none transition-all" 
+                    />
+                    <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 px-1 mt-1 leading-relaxed">Se agendado, o card pulará para a "Geladeira" no horário definido.</p>
                   </div>
+
+                  {activeTab === 'links' && (
+                    <>
+                      <div className="space-y-1.5">
+                        <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">URL do Parceiro</label>
+                        <input value={editForm.url || ''} onChange={e => setEditForm({...editForm, url: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nome do Ícone Lucide</label>
+                        <input value={editForm.icone_nome || ''} onChange={e => setEditForm({...editForm, icone_nome: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" placeholder="Ex: Star, Truck, Mail" />
+                      </div>
+                    </>
+                  )}
+                  {activeTab === 'avisos' && (
+                    <div className="space-y-1.5">
+                      <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Mensagem do Aviso</label>
+                      <textarea value={editForm.descricao_ou_imagem || ''} onChange={e => setEditForm({...editForm, descricao_ou_imagem: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-medium text-slate-800 dark:text-white min-h-[120px] outline-none" />
+                    </div>
+                  )}
+                  {activeTab === 'promocoes' && (
+                    <>
+                      <div className="space-y-1.5">
+                        <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">URL da Imagem Banner</label>
+                        <input value={editForm.imagem_url || ''} onChange={e => setEditForm({...editForm, imagem_url: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Link de Destino</label>
+                        <input value={editForm.url_destino || ''} onChange={e => setEditForm({...editForm, url_destino: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
+                      </div>
+                    </>
+                  )}
                 </>
               )}
             </div>

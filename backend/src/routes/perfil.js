@@ -37,6 +37,7 @@ const perfilUpdateSchema = z.object({
   sab_fecha: z.string().max(5).nullable().optional(),
   dom_abre:  z.string().max(5).nullable().optional(),
   dom_fecha: z.string().max(5).nullable().optional(),
+  loja_id:   z.number().optional(),
 }).superRefine((data, ctx) => {
   const dias = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'];
   dias.forEach(dia => {
@@ -101,10 +102,11 @@ export async function perfilRoutes(fastify) {
 
   // GET /api/loja/perfil
   fastify.get('/api/loja/perfil', async (request, reply) => {
-    const { loja_id } = request.user
+    const { loja_id: user_loja_id, is_admin } = request.user
+    const target_loja_id = (is_admin && request.query.loja_id) ? parseInt(request.query.loja_id) : user_loja_id
 
     const loja = await prisma.lojaCadastro.findFirst({
-      where: { id: loja_id, deletedAt: null },
+      where: { id: target_loja_id, deletedAt: null },
       select: SAFE_SELECT,
     })
 
@@ -117,28 +119,39 @@ export async function perfilRoutes(fastify) {
 
   // PUT /api/loja/perfil
   fastify.put('/api/loja/perfil', async (request, reply) => {
-    const { loja_id } = request.user
+    const { loja_id: user_loja_id, is_admin } = request.user
+    const target_loja_id = (is_admin && request.body.loja_id) ? parseInt(request.body.loja_id) : user_loja_id
 
     const parse = perfilUpdateSchema.safeParse(request.body)
     if (!parse.success) {
       return reply.status(400).send({ error: parse.error.flatten().fieldErrors })
     }
 
-    // Garante existência antes de atualizar
-    const exists = await prisma.lojaCadastro.findFirst({
-      where: { id: loja_id, deletedAt: null },
-      select: { id: true },
+    // Remove loja_id do corpo para não tentar atualizar o ID no banco
+    const { loja_id, ...updateData } = parse.data
+
+    // Garante existência antes de atualizar e verifica se é o admin principal
+    const target = await prisma.lojaCadastro.findFirst({
+      where: { id: target_loja_id, deletedAt: null },
+      select: { id: true, email: true },
     })
-    if (!exists) {
+
+    if (!target) {
       return reply.status(404).send({ error: 'Loja não encontrada.' })
     }
 
-    const loja = await prisma.lojaCadastro.update({
-      where: { id: loja_id },
-      data: parse.data,
+    // Proteção: Apenas o próprio admin principal (ou ninguém, dependendo da regra) pode editá-lo.
+    // Aqui vamos bloquear qualquer edição no admin@drogamais.com via esta rota se não for ele mesmo.
+    if (target.email === 'admin@drogamais.com' && request.user.email !== 'admin@drogamais.com') {
+      return reply.status(403).send({ error: 'Não é permitido editar o administrador principal.' })
+    }
+
+    const lojaResult = await prisma.lojaCadastro.update({
+      where: { id: target_loja_id },
+      data: updateData,
       select: SAFE_SELECT,
     })
 
-    return reply.send(loja)
+    return reply.send(lojaResult)
   })
 }
