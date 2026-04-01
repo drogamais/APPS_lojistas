@@ -256,12 +256,16 @@ export default function PerfilPage() {
           </div>
           <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-1.5">
-              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nome Fantasia</label>
-              <input type="text" name="nome_fantasia" value={form.nome_fantasia ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 focus:border-drogamais-400" />
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                Nome Fantasia <span className="text-[9px] font-black text-drogamais-400 bg-drogamais-50 dark:bg-drogamais-500/10 px-1.5 py-0.5 rounded-full tracking-wider normal-case">sincronizado</span>
+              </label>
+              <input type="text" name="nome_fantasia" value={form.nome_fantasia ?? ''} readOnly className="w-full bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-500 dark:text-slate-400 cursor-default select-all" />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Razão Social</label>
-              <input type="text" name="razao_social" value={form.razao_social ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 focus:border-drogamais-400" />
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                Razão Social <span className="text-[9px] font-black text-drogamais-400 bg-drogamais-50 dark:bg-drogamais-500/10 px-1.5 py-0.5 rounded-full tracking-wider normal-case">sincronizado</span>
+              </label>
+              <input type="text" name="razao_social" value={form.razao_social ?? ''} readOnly className="w-full bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-500 dark:text-slate-400 cursor-default select-all" />
             </div>
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1.5">
@@ -286,12 +290,16 @@ export default function PerfilPage() {
           </div>
           <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-5">
             <div className="space-y-1.5">
-              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Telefone</label>
-              <input type="text" name="telefone" placeholder="(XX) XXXXX-XXXX" value={form.telefone ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 font-mono" />
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                Telefone <span className="text-[9px] font-black text-drogamais-400 bg-drogamais-50 dark:bg-drogamais-500/10 px-1.5 py-0.5 rounded-full tracking-wider normal-case">sincronizado</span>
+              </label>
+              <input type="text" name="telefone" value={form.telefone ?? ''} readOnly className="w-full bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-500 dark:text-slate-400 cursor-default select-all font-mono" />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">WhatsApp</label>
-              <input type="text" name="whatsapp" placeholder="(XX) XXXXX-XXXX" value={form.whatsapp ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 font-mono" />
+              <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                WhatsApp <span className="text-[9px] font-black text-drogamais-400 bg-drogamais-50 dark:bg-drogamais-500/10 px-1.5 py-0.5 rounded-full tracking-wider normal-case">sincronizado</span>
+              </label>
+              <input type="text" name="whatsapp" value={form.whatsapp ?? ''} readOnly className="w-full bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-500 dark:text-slate-400 cursor-default select-all font-mono" />
             </div>
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Instagram</label>
@@ -308,34 +316,37 @@ export default function PerfilPage() {
 
         {/* ENDEREÇO */}
         <section className="bg-white dark:bg-slate-900 rounded-[20px] shadow-section dark:shadow-none border border-slate-200 dark:border-slate-800 overflow-hidden">
-          <div className="bg-slate-50/50 dark:bg-slate-800/40 px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2">
-            <MapPin className="text-slate-400 dark:text-slate-500" size={20} />
-            <h2 className="text-[15px] font-bold text-slate-700 dark:text-slate-200">Morada / Endereço</h2>
+          <div className="bg-slate-50/50 dark:bg-slate-800/40 px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MapPin className="text-slate-400 dark:text-slate-500" size={20} />
+              <h2 className="text-[15px] font-bold text-slate-700 dark:text-slate-200">Morada / Endereço</h2>
+            </div>
+            <span className="text-[9px] font-black text-drogamais-400 bg-drogamais-50 dark:bg-drogamais-500/10 px-2 py-1 rounded-full tracking-wider uppercase">Sincronizado do sistema</span>
           </div>
           <div className="p-6 grid grid-cols-1 sm:grid-cols-6 gap-5">
             <div className="sm:col-span-2 space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">CEP</label>
-              <input type="text" name="end_cep" value={form.end_cep ?? ''} onChange={handleChange} placeholder="00000-000" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+              <input type="text" name="end_cep" value={form.end_cep ?? ''} readOnly className="w-full bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-500 dark:text-slate-400 cursor-default select-all" />
             </div>
             <div className="sm:col-span-4 space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Rua / Logradouro</label>
-              <input type="text" name="end_rua" value={form.end_rua ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+              <input type="text" name="end_rua" value={form.end_rua ?? ''} readOnly className="w-full bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-500 dark:text-slate-400 cursor-default select-all" />
             </div>
             <div className="sm:col-span-2 space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Número</label>
-              <input type="text" name="end_numero" value={form.end_numero ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+              <input type="text" name="end_numero" value={form.end_numero ?? ''} readOnly className="w-full bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-500 dark:text-slate-400 cursor-default select-all" />
             </div>
             <div className="sm:col-span-4 space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Complemento</label>
-              <input type="text" name="end_complemento" value={form.end_complemento ?? ''} onChange={handleChange} placeholder="Sala, Andar, etc." className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+              <input type="text" name="end_complemento" value={form.end_complemento ?? ''} readOnly className="w-full bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-500 dark:text-slate-400 cursor-default select-all" />
             </div>
             <div className="sm:col-span-2 space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Bairro</label>
-              <input type="text" name="end_bairro" value={form.end_bairro ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+              <input type="text" name="end_bairro" value={form.end_bairro ?? ''} readOnly className="w-full bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-500 dark:text-slate-400 cursor-default select-all" />
             </div>
             <div className="sm:col-span-3 space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Cidade</label>
-              <input type="text" name="end_cidade" value={form.end_cidade ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+              <input type="text" name="end_cidade" value={form.end_cidade ?? ''} readOnly className="w-full bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-500 dark:text-slate-400 cursor-default select-all" />
             </div>
             <div className="sm:col-span-1 space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">UF</label>

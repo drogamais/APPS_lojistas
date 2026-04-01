@@ -12,14 +12,19 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       JWT_SECRET: ${JWT_SECRET}
       PORT: ${PORT}
+      DB_SYNC_HOST: ${DB_SYNC_HOST}
+      DB_SYNC_PORT: ${DB_SYNC_PORT}
+      DB_SYNC_USER: ${DB_SYNC_USER}
+      DB_SYNC_PASS: ${DB_SYNC_PASS}
     env_file:
       - .env
     volumes:
       - ./imgs:/app/imgs
     command: >
-      sh -c "npx prisma generate && 
-             npx prisma db push --accept-data-loss && 
-             node prisma/seed.js && 
+      sh -c "npx prisma generate &&
+             npx prisma db push --accept-data-loss &&
+             node prisma/seed.js &&
+             node scripts/sync-lojas.js || true &&
              node src/server.js"
 
   frontend:

@@ -34,6 +34,9 @@ export default function Layout() {
   /* mobile: drawer aberto/fechado */
   const [mobileOpen, setMobileOpen] = useState(false)
 
+  /* confirmação de logout */
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
+
   const navLinks = [
     { to: '/home',        label: 'Home',        icon: Home },
     { to: '/perfil',      label: 'Minha Loja',  icon: Store },
@@ -109,7 +112,7 @@ export default function Layout() {
         {/* ── Rodapé: botão sair ── */}
         <div className="p-3 border-t border-slate-200 dark:border-slate-800 shrink-0">
           <button
-            onClick={() => { logout(); onNavigate?.() }}
+            onClick={() => setShowLogoutModal(true)}
             className="flex items-center w-full px-2.5 py-3 text-[13.5px] font-medium
                        text-slate-500 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-drogamais-600 rounded-[12px]
                        transition-colors overflow-hidden"
@@ -233,6 +236,37 @@ export default function Layout() {
           <Outlet />
         </div>
       </main>
+
+      {/* Modal de confirmação de logout */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-[24px] border border-slate-200 dark:border-slate-800 shadow-2xl p-8 w-full max-w-sm flex flex-col gap-5">
+            <div className="flex flex-col items-center text-center gap-3">
+              <div className="w-14 h-14 rounded-full bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
+                <LogOut size={26} className="text-drogamais-500" strokeWidth={2} />
+              </div>
+              <h2 className="text-[18px] font-black text-slate-800 dark:text-white tracking-tight">Sair da conta?</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                Você será desconectado e redirecionado para a tela de login.
+              </p>
+            </div>
+            <div className="flex gap-3 mt-1">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 py-3 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => { setShowLogoutModal(false); logout() }}
+                className="flex-1 py-3 rounded-xl text-sm font-bold text-white bg-drogamais-500 hover:bg-drogamais-600 shadow-lg shadow-drogamais-500/20 transition-all hover:scale-105 active:scale-95"
+              >
+                Sair
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
