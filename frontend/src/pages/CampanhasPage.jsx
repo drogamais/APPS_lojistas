@@ -81,7 +81,7 @@ function SelectField({ label, value, onChange, options, placeholder = 'Todos' })
 function ThemedThead({ cor, colunas }) {
   return (
     <thead>
-      <tr style={{ backgroundColor: cor ?? '#64748b' }}>
+      <tr style={{ backgroundColor: cor ?? '#64748b' }} className="sticky top-0 z-10 shadow-sm">
         {colunas.map((col, i) => (
           <th
             key={i}
@@ -128,6 +128,8 @@ export default function CampanhasPage() {
   const [loadingCampanhas, setLoadingCampanhas] = useState(true)
   const [loadingDados,     setLoadingDados]     = useState(false)
   const [error,            setError]            = useState(null)
+  const [expandeRanking,   setExpandeRanking]   = useState(false)
+  const [expandeVendas,    setExpandeVendas]    = useState(false)
 
   // ── Filtros: aba Principal ──
   const [filtroLoja,         setFiltroLoja]         = useState('')
@@ -167,6 +169,7 @@ export default function CampanhasPage() {
     setFiltroLoja(''); setFiltroColaborador(''); setFiltroMes('')
     setFiltroVendasMes(''); setFiltroVendasData(''); setFiltroVendasColaborador('')
     setFiltroVendasLoja(''); setFiltroVendasProduto('')
+    setExpandeRanking(false); setExpandeVendas(false)
 
     Promise.all([
       api.get(`/api/campanhas/${campanhaAtiva.id}/ranking`),
@@ -230,7 +233,6 @@ export default function CampanhasPage() {
       .filter(r => !filtroLoja        || r.loja_completo    === filtroLoja)
       .filter(r => !filtroColaborador || r.nome_colaborador === filtroColaborador)
       .filter(r => !filtroMes         || r.ano_mes_referencia === filtroMes)
-      .slice(0, 10)
   }, [rankingData.ranking, filtroLoja, filtroColaborador, filtroMes])
 
   // ── Filtragem in-memory: Vendas Detalhadas (top 10) ──
@@ -241,7 +243,6 @@ export default function CampanhasPage() {
       .filter(v => !filtroVendasColaborador || v.nome_colaborador === filtroVendasColaborador)
       .filter(v => !filtroVendasLoja        || v.nome_fantasia === filtroVendasLoja)
       .filter(v => !filtroVendasProduto     || v.descricao_produto_campanha === filtroVendasProduto)
-      .slice(0, 10)
   }, [vendas, filtroVendasMes, filtroVendasData, filtroVendasColaborador, filtroVendasLoja, filtroVendasProduto])
 
   const temFiltrosPrincipal = filtroLoja || filtroColaborador || filtroMes
@@ -516,7 +517,7 @@ export default function CampanhasPage() {
                   {rankingFiltrado.length === 0 ? (
                     <EstadoVazio mensagem="Nenhum resultado encontrado para os filtros aplicados." />
                   ) : rankingFiltrado.length <= 3 ? null : (
-                    <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card">
+                    <div className="overflow-auto max-h-[400px] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card custom-scrollbar">
                       <table className="w-full text-sm">
                         <ThemedThead cor={cor} colunas={[
                           { label: 'Pos.',        align: 'center' },
@@ -526,7 +527,7 @@ export default function CampanhasPage() {
                           { label: 'Período',     align: 'center' },
                         ]} />
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
-                          {rankingFiltrado.slice(3).map((entry, i) => (
+                          {(expandeRanking ? rankingFiltrado.slice(3) : rankingFiltrado.slice(3, 10)).map((entry, i) => (
                             <tr
                               key={i}
                               className={`transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30
@@ -564,6 +565,19 @@ export default function CampanhasPage() {
                       </table>
                     </div>
                   )}
+
+                  {rankingFiltrado.length > 10 && (
+                    <div className="flex justify-center pt-3">
+                      <button
+                        onClick={() => setExpandeRanking(!expandeRanking)}
+                        className="flex items-center gap-2 px-6 py-2 rounded-xl border border-slate-200 dark:border-slate-800
+                                   text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 font-bold text-xs
+                                   transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50 active:scale-95"
+                      >
+                        {expandeRanking ? 'Ver menos' : 'Ver mais'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -572,7 +586,7 @@ export default function CampanhasPage() {
                 vendasFiltradas.length === 0 ? (
                   <EstadoVazio mensagem="Nenhuma venda encontrada para os filtros aplicados." />
                 ) : (
-                  <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card">
+                  <div className="overflow-auto max-h-[400px] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card custom-scrollbar">
                     <table className="w-full text-sm">
                       <ThemedThead cor={cor} colunas={[
                         { label: 'Data',         align: 'left'   },
@@ -583,7 +597,7 @@ export default function CampanhasPage() {
                         { label: 'Pontos',       align: 'right'  },
                       ]} />
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
-                        {vendasFiltradas.map((v, i) => (
+                        {(expandeVendas ? vendasFiltradas : vendasFiltradas.slice(0, 10)).map((v, i) => (
                           <tr key={i} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30">
                             <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-300">
                               {formatarData(v.data_venda)}
@@ -609,6 +623,19 @@ export default function CampanhasPage() {
                     </table>
                   </div>
                 )
+              )}
+
+              {(abaAtiva === 'vendas' && vendasFiltradas.length > 10) && (
+                <div className="flex justify-center pt-3">
+                  <button
+                    onClick={() => setExpandeVendas(!expandeVendas)}
+                    className="flex items-center gap-2 px-6 py-2 rounded-xl border border-slate-200 dark:border-slate-800
+                               text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 font-bold text-xs
+                               transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50 active:scale-95"
+                  >
+                    {expandeVendas ? 'Ver menos' : 'Ver mais'}
+                  </button>
+                </div>
               )}
 
               {/* ─── ABA: Produtos Pontuáveis ─── */}
