@@ -241,7 +241,7 @@ export default function AdminHomePage() {
 
   return (
     <div className="max-w-6xl mx-auto w-full pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500 select-none">
-      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-[0_2px_12px_rgba(0,0,0,0.07)]">
         <div>
           <h1 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">Administração de Conteúdo</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm font-medium">
@@ -306,8 +306,8 @@ export default function AdminHomePage() {
           </div>
 
           {/* COLUNA 2: OCULTOS / EXPIRADOS */}
-          <div className="bg-slate-50/70 dark:bg-slate-900/40 rounded-[24px] border border-slate-200/60 dark:border-slate-800/60 shadow-inner flex flex-col h-[65vh] min-h-[500px]">
-            <div className="p-4 border-b border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 rounded-t-[24px] flex items-center justify-between shadow-sm">
+          <div className="bg-slate-50/70 dark:bg-slate-900/40 rounded-[24px] border border-slate-200 dark:border-slate-800/60 shadow-inner flex flex-col h-[65vh] min-h-[500px]">
+            <div className="p-4 border-b border-slate-200 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 rounded-t-[24px] flex items-center justify-between shadow-sm">
               <h2 className="font-black text-slate-400 dark:text-slate-600 flex items-center gap-2 text-xs tracking-widest uppercase">
                 <span className="w-2.5 h-2.5 rounded-full bg-slate-300 dark:bg-slate-700"></span>
                 Geladeira (Ocultos)
@@ -335,8 +335,8 @@ export default function AdminHomePage() {
       {/* MODAL DE EDIÇÃO */}
       {editingItem && (
         <div className="fixed inset-0 bg-slate-950/80 dark:bg-black/80 z-50 flex items-center justify-center p-4 shadow-2xl backdrop-blur-md animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-slate-900 rounded-[28px] w-full max-w-lg p-8 shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col gap-5">
-            <div className="flex justify-between items-center border-b pb-4 border-slate-100 dark:border-slate-800">
+          <div className="bg-white dark:bg-slate-900 rounded-[28px] w-full max-w-lg p-8 shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col gap-5">
+            <div className="flex justify-between items-center border-b pb-4 border-slate-200 dark:border-slate-800">
               <h3 className="font-black text-[18px] text-slate-800 dark:text-white uppercase tracking-tight">
                 Editar {activeTab.toUpperCase()}
               </h3>
@@ -354,7 +354,7 @@ export default function AdminHomePage() {
                 <input 
                   value={editForm.titulo || ''} 
                   onChange={e => setEditForm({...editForm, titulo: e.target.value})}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-drogamais-500/20 outline-none transition-all" 
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-drogamais-500/20 outline-none transition-all" 
                 />
               </div>
 
@@ -364,7 +364,7 @@ export default function AdminHomePage() {
                   type="datetime-local"
                   value={editForm.data_expiracao_input || ''} 
                   onChange={e => setEditForm({...editForm, data_expiracao_input: e.target.value})}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-drogamais-500/20 outline-none transition-all" 
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-drogamais-500/20 outline-none transition-all" 
                 />
                 <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 px-1 mt-1 leading-relaxed">Se agendado, o card pulará para a "Geladeira" no horário definido.</p>
               </div>
@@ -373,35 +373,35 @@ export default function AdminHomePage() {
                 <>
                   <div className="space-y-1.5">
                     <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">URL do Parceiro</label>
-                    <input value={editForm.url || ''} onChange={e => setEditForm({...editForm, url: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
+                    <input value={editForm.url || ''} onChange={e => setEditForm({...editForm, url: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nome do Ícone Lucide</label>
-                    <input value={editForm.icone_nome || ''} onChange={e => setEditForm({...editForm, icone_nome: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" placeholder="Ex: Star, Truck, Mail" />
+                    <input value={editForm.icone_nome || ''} onChange={e => setEditForm({...editForm, icone_nome: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" placeholder="Ex: Star, Truck, Mail" />
                   </div>
                 </>
               )}
               {activeTab === 'avisos' && (
                 <div className="space-y-1.5">
                   <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Mensagem do Aviso</label>
-                  <textarea value={editForm.descricao_ou_imagem || ''} onChange={e => setEditForm({...editForm, descricao_ou_imagem: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 dark:text-white min-h-[120px] outline-none" />
+                  <textarea value={editForm.descricao_ou_imagem || ''} onChange={e => setEditForm({...editForm, descricao_ou_imagem: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-medium text-slate-800 dark:text-white min-h-[120px] outline-none" />
                 </div>
               )}
               {activeTab === 'promocoes' && (
                 <>
                   <div className="space-y-1.5">
                     <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">URL da Imagem Banner</label>
-                    <input value={editForm.imagem_url || ''} onChange={e => setEditForm({...editForm, imagem_url: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
+                    <input value={editForm.imagem_url || ''} onChange={e => setEditForm({...editForm, imagem_url: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Link de Destino</label>
-                    <input value={editForm.url_destino || ''} onChange={e => setEditForm({...editForm, url_destino: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
+                    <input value={editForm.url_destino || ''} onChange={e => setEditForm({...editForm, url_destino: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none" />
                   </div>
                 </>
               )}
             </div>
 
-            <div className="mt-4 pt-5 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
+            <div className="mt-4 pt-5 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
               <button 
                 onClick={() => setEditingItem(null)} 
                 className="px-6 py-3 text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all"

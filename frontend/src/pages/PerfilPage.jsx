@@ -229,7 +229,7 @@ export default function PerfilPage() {
 
   return (
     <div className="max-w-3xl mx-auto pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-8 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+      <div className="mb-8 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-[0_2px_12px_rgba(0,0,0,0.07)]">
         <h1 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">Perfil da Loja</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
           <Building2 size={16} className="text-drogamais-500" /> 
@@ -249,104 +249,104 @@ export default function PerfilPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* INFORMAÇÕES BÁSICAS */}
-        <section className="bg-white dark:bg-slate-900 rounded-[20px] shadow-[0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden">
-          <div className="bg-slate-50/50 dark:bg-slate-800/40 px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+        <section className="bg-white dark:bg-slate-900 rounded-[20px] shadow-section dark:shadow-none border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <div className="bg-slate-50/50 dark:bg-slate-800/40 px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2">
             <Building2 className="text-slate-400 dark:text-slate-500" size={20} />
             <h2 className="text-[15px] font-bold text-slate-700 dark:text-slate-200">Informações Básicas</h2>
           </div>
           <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nome Fantasia</label>
-              <input type="text" name="nome_fantasia" value={form.nome_fantasia ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 focus:border-drogamais-400" />
+              <input type="text" name="nome_fantasia" value={form.nome_fantasia ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 focus:border-drogamais-400" />
             </div>
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Razão Social</label>
-              <input type="text" name="razao_social" value={form.razao_social ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 focus:border-drogamais-400" />
+              <input type="text" name="razao_social" value={form.razao_social ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 focus:border-drogamais-400" />
             </div>
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1.5">
                 <Maximize size={12} className="text-slate-300" /> Área da Loja (m²)
               </label>
-              <input type="number" name="area_loja" value={form.area_loja ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+              <input type="number" name="area_loja" value={form.area_loja ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1.5">
                 <Car size={12} className="text-slate-300" /> Vagas Estacionamento
               </label>
-              <input type="number" name="vagas_estacionamento" value={form.vagas_estacionamento ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+              <input type="number" name="vagas_estacionamento" value={form.vagas_estacionamento ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
           </div>
         </section>
 
         {/* CONTATOS */}
-        <section className="bg-white dark:bg-slate-900 rounded-[20px] shadow-[0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden">
-          <div className="bg-slate-50/50 dark:bg-slate-800/40 px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+        <section className="bg-white dark:bg-slate-900 rounded-[20px] shadow-section dark:shadow-none border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <div className="bg-slate-50/50 dark:bg-slate-800/40 px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2">
             <Smartphone className="text-slate-400 dark:text-slate-500" size={20} />
             <h2 className="text-[15px] font-bold text-slate-700 dark:text-slate-200">Contactos da Loja</h2>
           </div>
           <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-5">
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Telefone</label>
-              <input type="text" name="telefone" placeholder="(XX) XXXXX-XXXX" value={form.telefone ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 font-mono" />
+              <input type="text" name="telefone" placeholder="(XX) XXXXX-XXXX" value={form.telefone ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 font-mono" />
             </div>
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">WhatsApp</label>
-              <input type="text" name="whatsapp" placeholder="(XX) XXXXX-XXXX" value={form.whatsapp ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 font-mono" />
+              <input type="text" name="whatsapp" placeholder="(XX) XXXXX-XXXX" value={form.whatsapp ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 font-mono" />
             </div>
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Instagram</label>
-              <input type="text" name="instagram" placeholder="@drogamais" value={form.instagram ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+              <input type="text" name="instagram" placeholder="@drogamais" value={form.instagram ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
             <div className="space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-1.5">
                 <Facebook size={12} className="text-slate-300" /> Facebook
               </label>
-              <input type="text" name="facebook" placeholder="fb.com/..." value={form.facebook ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+              <input type="text" name="facebook" placeholder="fb.com/..." value={form.facebook ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
           </div>
         </section>
 
         {/* ENDEREÇO */}
-        <section className="bg-white dark:bg-slate-900 rounded-[20px] shadow-[0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden">
-          <div className="bg-slate-50/50 dark:bg-slate-800/40 px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+        <section className="bg-white dark:bg-slate-900 rounded-[20px] shadow-section dark:shadow-none border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <div className="bg-slate-50/50 dark:bg-slate-800/40 px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2">
             <MapPin className="text-slate-400 dark:text-slate-500" size={20} />
             <h2 className="text-[15px] font-bold text-slate-700 dark:text-slate-200">Morada / Endereço</h2>
           </div>
           <div className="p-6 grid grid-cols-1 sm:grid-cols-6 gap-5">
             <div className="sm:col-span-2 space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">CEP</label>
-              <input type="text" name="end_cep" value={form.end_cep ?? ''} onChange={handleChange} placeholder="00000-000" className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+              <input type="text" name="end_cep" value={form.end_cep ?? ''} onChange={handleChange} placeholder="00000-000" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
             <div className="sm:col-span-4 space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Rua / Logradouro</label>
-              <input type="text" name="end_rua" value={form.end_rua ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+              <input type="text" name="end_rua" value={form.end_rua ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
             <div className="sm:col-span-2 space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Número</label>
-              <input type="text" name="end_numero" value={form.end_numero ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+              <input type="text" name="end_numero" value={form.end_numero ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
             <div className="sm:col-span-4 space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Complemento</label>
-              <input type="text" name="end_complemento" value={form.end_complemento ?? ''} onChange={handleChange} placeholder="Sala, Andar, etc." className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+              <input type="text" name="end_complemento" value={form.end_complemento ?? ''} onChange={handleChange} placeholder="Sala, Andar, etc." className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
             <div className="sm:col-span-2 space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Bairro</label>
-              <input type="text" name="end_bairro" value={form.end_bairro ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+              <input type="text" name="end_bairro" value={form.end_bairro ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
             <div className="sm:col-span-3 space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Cidade</label>
-              <input type="text" name="end_cidade" value={form.end_cidade ?? ''} onChange={handleChange} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+              <input type="text" name="end_cidade" value={form.end_cidade ?? ''} onChange={handleChange} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20" />
             </div>
             <div className="sm:col-span-1 space-y-1.5">
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">UF</label>
-              <input type="text" name="end_uf" value={form.end_uf ?? ''} onChange={handleChange} maxLength="2" placeholder="SP" className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 uppercase text-center" />
+              <input type="text" name="end_uf" value={form.end_uf ?? ''} onChange={handleChange} maxLength="2" placeholder="SP" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 dark:text-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-drogamais-500/20 uppercase text-center" />
             </div>
           </div>
         </section>
 
         {/* HORÁRIOS */}
-        <section className="bg-white dark:bg-slate-900 rounded-[20px] shadow-[0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden">
-          <div className="bg-slate-50/50 dark:bg-slate-800/40 px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <section className="bg-white dark:bg-slate-900 rounded-[20px] shadow-section dark:shadow-none border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <div className="bg-slate-50/50 dark:bg-slate-800/40 px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Clock className="text-slate-400 dark:text-slate-500" size={20} />
               <h2 className="text-[15px] font-bold text-slate-700 dark:text-slate-200">Horário de Funcionamento</h2>
@@ -390,7 +390,7 @@ export default function PerfilPage() {
                     ) : (
                       <div className={`flex items-center gap-3 animate-in fade-in zoom-in-95 duration-200 w-full ${form[`is_${prefix}_24h`] ? 'opacity-50 pointer-events-none' : ''}`}>
                         {/* ABERTURA */}
-                        <div className="flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 shadow-sm hover:shadow-md transition-shadow">
                           <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mr-1 select-none">Abre</span>
                           <select 
                             disabled={form[`is_${prefix}_24h`]}
@@ -416,7 +416,7 @@ export default function PerfilPage() {
                         <span className="text-slate-300 dark:text-slate-600 font-bold text-xs">até</span>
 
                         {/* FECHAMENTO */}
-                        <div className="flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 shadow-sm hover:shadow-md transition-shadow">
                           <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mr-1 select-none">Fecha</span>
                           <select 
                             disabled={form[`is_${prefix}_24h`]}
@@ -448,8 +448,8 @@ export default function PerfilPage() {
         </section>
 
         {/* INTEGRAÇÃO GOOGLE CALENDAR */}
-        <section className="bg-white dark:bg-slate-900 rounded-[20px] shadow-[0_4px_12px_rgba(0,0,0,0.03)] dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden">
-          <div className="bg-slate-50/50 dark:bg-slate-800/40 px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <section className="bg-white dark:bg-slate-900 rounded-[20px] shadow-section dark:shadow-none border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <div className="bg-slate-50/50 dark:bg-slate-800/40 px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Calendar className="text-slate-400 dark:text-slate-500" size={20} />
               <h2 className="text-[15px] font-bold text-slate-700 dark:text-slate-200">Integração Google Calendar</h2>
@@ -475,7 +475,7 @@ export default function PerfilPage() {
                     value={form.google_email || ''}
                     onChange={(e) => setForm({ ...form, google_email: e.target.value })}
                     placeholder="seuemail@gmail.com"
-                    className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl py-3 pl-10 pr-4 text-sm font-bold text-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl py-3 pl-10 pr-4 text-sm font-bold text-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                   />
                 </div>
               </div>

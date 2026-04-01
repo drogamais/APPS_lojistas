@@ -162,7 +162,7 @@ export default function ServicosPage() {
 
   return (
     <div className="max-w-6xl mx-auto pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between mb-8 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+      <div className="flex items-center justify-between mb-8 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-[0_2px_12px_rgba(0,0,0,0.07)]">
         <div>
           <h1 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight flex items-center gap-3">
             <Briefcase className="text-drogamais-500" /> Serviços
@@ -206,9 +206,9 @@ export default function ServicosPage() {
         <div className="fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-in fade-in duration-300">
           <form
             onSubmit={handleSubmit}
-            className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[32px] shadow-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] shadow-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
           >
-            <div className="flex justify-between items-center mb-8 border-b pb-4 border-slate-100 dark:border-slate-800">
+            <div className="flex justify-between items-center mb-8 border-b pb-4 border-slate-200 dark:border-slate-800">
               <h2 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight">
                 {editId ? 'Editar Serviço' : 'Novo Serviço'}
               </h2>
@@ -224,12 +224,12 @@ export default function ServicosPage() {
             <div className="space-y-6">
               <div className="space-y-1.5">
                 <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nome do Serviço</label>
-                <input required value={form.nome_servico} onChange={e => setForm({...form, nome_servico: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-drogamais-500/20" />
+                <input required value={form.nome_servico} onChange={e => setForm({...form, nome_servico: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-drogamais-500/20" />
               </div>
 
               <div className="space-y-1.5">
                 <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Descrição</label>
-                <textarea rows={2} value={form.descricao} onChange={e => setForm({...form, descricao: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 dark:text-white outline-none" />
+                <textarea rows={2} value={form.descricao} onChange={e => setForm({...form, descricao: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-xl px-4 py-3 text-sm font-medium text-slate-800 dark:text-white outline-none" />
               </div>
 
               {/* GESTOR DE HORÁRIOS */}
@@ -238,7 +238,7 @@ export default function ServicosPage() {
                    <Clock size={14} /> Agenda Especial (Pedaços do dia)
                 </label>
                 
-                <div className="border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden divide-y divide-slate-50 dark:divide-slate-800">
+                <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
                   {DIAS.map((dia) => {
                     const slots = form.horarios[dia.id] || []
                     const isOpen = expandedDay === dia.id
@@ -265,11 +265,11 @@ export default function ServicosPage() {
                                 <div className="flex-1 grid grid-cols-2 gap-2">
                                    <div className="relative">
                                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-400 uppercase">A</span>
-                                      <input type="time" value={slot.abre} onChange={e => updateSlot(dia.id, idx, 'abre', e.target.value)} className="w-full pl-6 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-800 dark:text-white" />
+                                      <input type="time" value={slot.abre} onChange={e => updateSlot(dia.id, idx, 'abre', e.target.value)} className="w-full pl-6 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-lg text-xs font-bold text-slate-800 dark:text-white" />
                                    </div>
                                    <div className="relative">
                                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-400 uppercase">F</span>
-                                      <input type="time" value={slot.fecha} onChange={e => updateSlot(dia.id, idx, 'fecha', e.target.value)} className="w-full pl-6 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-800 dark:text-white" />
+                                      <input type="time" value={slot.fecha} onChange={e => updateSlot(dia.id, idx, 'fecha', e.target.value)} className="w-full pl-6 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm rounded-lg text-xs font-bold text-slate-800 dark:text-white" />
                                    </div>
                                 </div>
                                 <button type="button" onClick={() => removeSlot(dia.id, idx)} className="p-2 text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
@@ -290,7 +290,7 @@ export default function ServicosPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800">
                 <input
                   id="ativo-s"
                   type="checkbox"
@@ -304,7 +304,7 @@ export default function ServicosPage() {
 
             {error && <p className="mt-6 text-sm text-red-600 bg-red-50 dark:bg-red-950/20 rounded-xl px-4 py-3 border border-red-100 dark:border-red-900/50 font-bold flex items-center gap-2"><AlertCircle size={16}/> {error}</p>}
 
-            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row gap-3 justify-end">
+            <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row gap-3 justify-end">
               <button type="button" onClick={() => setShowForm(false)} className="px-8 py-3 text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all">
                 Cancelar
               </button>
@@ -324,12 +324,12 @@ export default function ServicosPage() {
       {loading ? (
         <div className="p-12 text-center text-slate-400 dark:text-slate-600 animate-pulse font-black italic uppercase tracking-widest">Carregando catálogo...</div>
       ) : lista.length === 0 ? (
-        <div className="p-20 text-center bg-white dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-100 dark:border-slate-800">
+        <div className="p-20 text-center bg-white dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
           <Briefcase size={48} className="mx-auto text-slate-200 dark:text-slate-800 mb-4" />
           <p className="text-slate-500 dark:text-slate-500 font-bold">Nenhum serviço disponível.</p>
         </div>
       ) : viewMode === 'list' ? (
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden overflow-x-auto">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden overflow-x-auto">
           {/* Tabela de Serviços (Conteúdo original da tabela aqui) */}
           <table className="w-full text-sm">
             <thead className="bg-slate-50 dark:bg-slate-800/50 text-[10px] uppercase font-black text-slate-400 dark:text-slate-500 tracking-widest">
@@ -340,7 +340,7 @@ export default function ServicosPage() {
                 <th className="px-6 py-5"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {lista.map((s) => (
                 <tr key={s.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all group">
                   <td className="px-6 py-5">
@@ -352,7 +352,7 @@ export default function ServicosPage() {
                   <td className="px-6 py-5">
                     <div className="flex flex-wrap gap-1.5">
                       {DIAS.map(d => (s.horarios?.[d.id]?.length > 0) && (
-                        <div key={d.id} className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-md border border-slate-100 dark:border-slate-700">
+                        <div key={d.id} className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700">
                            <span className="text-[9px] font-black text-drogamais-500 uppercase">{d.id}</span>
                            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">({s.horarios[d.id].length})</span>
                         </div>
@@ -378,7 +378,7 @@ export default function ServicosPage() {
           </table>
         </div>
       ) : (
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-6 animate-in zoom-in-95 duration-500 overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-6 animate-in zoom-in-95 duration-500 overflow-hidden">
           <style>{`
             .rbc-calendar { min-height: 700px; color: inherit; font-family: inherit; }
             .rbc-event { 

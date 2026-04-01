@@ -86,8 +86,8 @@ function AvisosCarousel({ avisos }) {
             {marqueeItems.map((aviso, idx) => (
               <div
                 key={`${aviso.id}-${idx}`}
-                className="w-[340px] shrink-0 relative bg-gradient-to-b from-white dark:from-slate-900 to-slate-50/50 dark:to-slate-900/50 rounded-[18px] p-6 
-                           flex flex-col justify-between border border-slate-200 dark:border-slate-800 shadow-[0_4px_12px_rgba(0,0,0,0.03)] 
+                className="w-[340px] shrink-0 relative bg-gradient-to-b from-white dark:from-slate-900 to-slate-50/50 dark:to-slate-900/50 rounded-[18px] p-6
+                           flex flex-col justify-between border border-slate-200 dark:border-slate-800 shadow-section
                            hover:shadow-[0_12px_24px_rgba(0,0,0,1)] hover:border-drogamais-200 hover:-translate-y-1 
                            transition-all duration-300 min-h-[150px] overflow-hidden group/card cursor-default"
               >
@@ -230,7 +230,7 @@ function PromocoesCarousel({ promocoes }) {
       <div className="flex items-center gap-5 mt-4 z-40">
         <button
           onClick={prev}
-          className="p-1.5 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-slate-100 hover:bg-drogamais-50 text-slate-500 hover:text-drogamais-500 transition focus:outline-none"
+          className="p-1.5 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-slate-200 hover:bg-drogamais-50 text-slate-500 hover:text-drogamais-500 transition focus:outline-none"
         >
           <LucideIcons.ChevronLeft size={18} />
         </button>
@@ -248,7 +248,7 @@ function PromocoesCarousel({ promocoes }) {
 
         <button
           onClick={() => { clearTimeout(timerRef.current); next() }}
-          className="p-1.5 rounded-full bg-white dark:bg-slate-800 shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-slate-100 dark:border-slate-800 hover:bg-drogamais-50 dark:hover:bg-drogamais-500/10 text-slate-500 hover:text-drogamais-500 transition focus:outline-none"
+          className="p-1.5 rounded-full bg-white dark:bg-slate-800 shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-slate-200 dark:border-slate-800 hover:bg-drogamais-50 dark:hover:bg-drogamais-500/10 text-slate-500 hover:text-drogamais-500 transition focus:outline-none"
         >
           <LucideIcons.ChevronRight size={18} />
         </button>
@@ -267,8 +267,8 @@ function QuickAccessPanel({ links }) {
   const displayLinks = showAll ? links : links.slice(0, limite)
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-[22px] border border-slate-100 dark:border-slate-800 shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
-      <div className="p-4 px-6 border-b border-slate-50 dark:border-slate-800 flex items-center gap-2 bg-slate-50/20 dark:bg-slate-800/20">
+    <div className="bg-white dark:bg-slate-900 rounded-[22px] border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden flex flex-col">
+      <div className="p-4 px-6 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2 bg-slate-50/20 dark:bg-slate-800/20">
         <LucideIcons.Zap size={17} className="text-drogamais-500" />
         <h2 className="text-[14.5px] font-bold text-slate-800 dark:text-slate-100 tracking-wide">Acesso Rápido</h2>
       </div>
@@ -285,11 +285,11 @@ function QuickAccessPanel({ links }) {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-slate-50/60 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 rounded-[14px] px-3.5 py-2.5
+                  className="bg-slate-50/60 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-800 rounded-[14px] px-3.5 py-2.5
                              hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] hover:border-drogamais-100 dark:hover:border-drogamais-800 hover:bg-white dark:hover:bg-slate-800
                              transition-all duration-200 group flex items-center gap-3"
                 >
-                  <div className="w-9 h-9 shrink-0 rounded-[10px] bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm
+                  <div className="w-9 h-9 shrink-0 rounded-[10px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm
                                   group-hover:bg-drogamais-50 dark:group-hover:bg-drogamais-500/10 group-hover:border-drogamais-100 text-drogamais-500 
                                   flex items-center justify-center transition-all duration-300">
                     <DynamicIcon name={link.icone_nome} size={17} strokeWidth={2.2} />
@@ -306,7 +306,7 @@ function QuickAccessPanel({ links }) {
             {links.length > limite && (
               <button
                 onClick={() => setShowAll(!showAll)}
-                className="mt-3 w-full py-2.5 rounded-[12px] bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700
+                className="mt-3 w-full py-2.5 rounded-[12px] bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700
                            text-[12px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors flex justify-center items-center gap-1.5"
               >
                 {showAll ? (
@@ -377,8 +377,8 @@ export default function HomePage() {
           
           {/* Mural de Avisos em Carrossel Minimalista */}
           {avisos.length > 0 && (
-             <section className="bg-white dark:bg-slate-900 rounded-[20px] border border-slate-100 dark:border-slate-800 shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden">
-                <div className="p-3 px-5 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between bg-slate-50/30 dark:bg-slate-800/10">
+             <section className="bg-white dark:bg-slate-900 rounded-[20px] border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
+                <div className="p-3 px-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/30 dark:bg-slate-800/10">
                   <div className="flex items-center gap-2">
                     <LucideIcons.Megaphone size={16} className="text-drogamais-500" />
                     <h2 className="text-[14px] font-bold text-slate-800 dark:text-slate-100 tracking-wide">Mural de Avisos</h2>
@@ -396,7 +396,7 @@ export default function HomePage() {
 
           {/* Destaques e Promoções */}
           {promocoes.length > 0 && (
-             <div className="bg-white dark:bg-slate-900 rounded-[20px] border border-slate-100 dark:border-slate-800 shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden">
+             <div className="bg-white dark:bg-slate-900 rounded-[20px] border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden">
                 <div className="pt-3 px-6 flex items-center gap-2">
                   <LucideIcons.Star size={16} className="text-drogamais-500" />
                   <h2 className="text-[14px] font-bold text-slate-800 dark:text-slate-100 tracking-wide">Destaques e Promoções</h2>

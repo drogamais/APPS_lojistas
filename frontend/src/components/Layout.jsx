@@ -47,10 +47,10 @@ export default function Layout() {
   /* ── Sidebar compartilhado (desktop hover + mobile drawer) ── */
   function SidebarContent({ onNavigate, isDesktop }) {
     return (
-      <div className="flex flex-col h-full overflow-hidden bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800">
+      <div className="flex flex-col h-full overflow-hidden bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
 
         {/* ── Cabeçalho do sidebar ── */}
-        <div className="h-16 flex items-center px-[17px] border-b border-slate-100 dark:border-slate-800 shrink-0">
+        <div className="h-16 flex items-center px-[17px] border-b border-slate-200 dark:border-slate-800 shrink-0">
           <div
             className="flex items-center flex-1 min-w-0 cursor-pointer"
             onClick={() => { navigate('/home'); onNavigate?.() }}
@@ -60,9 +60,11 @@ export default function Layout() {
               alt="Drogamais"
               className="w-[34px] h-[34px] shrink-0"
             />
-            <span className={`font-extrabold text-[15.5px] text-drogamais-500 tracking-tight ml-3 whitespace-nowrap transition-opacity duration-200
+            <span
+              style={{ fontFamily: "'Gotham', sans-serif" }}
+              className={`font-extrabold text-[15.5px] text-drogamais-500 tracking-tight ml-3 whitespace-nowrap transition-opacity duration-200
                              ${isDesktop ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'} `}>
-              Drogamais
+              DROGAMAIS
             </span>
           </div>
         </div>
@@ -105,7 +107,7 @@ export default function Layout() {
         </nav>
 
         {/* ── Rodapé: botão sair ── */}
-        <div className="p-3 border-t border-slate-100 dark:border-slate-800 shrink-0">
+        <div className="p-3 border-t border-slate-200 dark:border-slate-800 shrink-0">
           <button
             onClick={() => { logout(); onNavigate?.() }}
             className="flex items-center w-full px-2.5 py-3 text-[13.5px] font-medium
@@ -129,7 +131,7 @@ export default function Layout() {
       {/* ════════════════════════════════
           MOBILE: Topbar + Drawer
       ════════════════════════════════ */}
-      <div className="md:hidden fixed top-0 inset-x-0 h-14 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800
+      <div className="md:hidden fixed top-0 inset-x-0 h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800
                       z-30 flex items-center justify-between px-4 shadow-sm">
         <button
           onClick={() => setMobileOpen(true)}
@@ -176,7 +178,7 @@ export default function Layout() {
 
       <aside
         className="hidden md:flex flex-col h-screen fixed top-0 left-0 bg-white dark:bg-slate-900 z-50
-                   border-r border-slate-100 dark:border-slate-800 group shadow-sm hover:shadow-[10px_0_30px_rgba(0,0,0,0.12)]
+                   border-r border-slate-200 dark:border-slate-800 group shadow-[4px_0_16px_rgba(0,0,0,0.06)] hover:shadow-[10px_0_30px_rgba(0,0,0,0.12)]
                    transition-[width,box-shadow] duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]"
         style={{ width: SIDEBAR_W_COLLAPSED }}
         onMouseEnter={(e) => e.currentTarget.style.width = SIDEBAR_W_EXPANDED}
@@ -191,7 +193,7 @@ export default function Layout() {
       <main className="flex-1 min-w-0 flex flex-col pt-14 md:pt-0">
         
         {/* TOP BAR / HEADER INFORMATIVO */}
-        <header className="h-12 shrink-0 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between px-6 z-20">
+        <header className="h-12 shrink-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 z-20">
           <div className="flex items-center gap-2 text-slate-400">
             <span className="text-[11px] font-medium tracking-wider uppercase hidden sm:block">Dashboard Lojista</span>
           </div>
@@ -208,7 +210,7 @@ export default function Layout() {
 
             {/* User Details */}
             {userDetails && (
-              <div className="flex items-center gap-3 border-l border-slate-100 dark:border-slate-800 pl-4 h-7">
+              <div className="flex items-center gap-3 border-l border-slate-200 dark:border-slate-800 pl-4 h-7">
                 <div className="flex flex-col items-end">
                   <div className="flex items-center gap-1 text-slate-700 dark:text-slate-200">
                     <span className="text-[12px] font-bold truncate max-w-[180px]">{userDetails.email || 'Usuário'}</span>

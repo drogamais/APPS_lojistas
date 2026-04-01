@@ -22,6 +22,10 @@ export default {
           900: '#6b000b',
         },
       },
+      boxShadow: {
+        'card':    '0 4px 20px rgba(0,0,0,0.08)',
+        'section': '0 4px 12px rgba(0,0,0,0.07)',
+      },
     },
   },
   plugins: [],

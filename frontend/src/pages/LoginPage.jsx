@@ -67,7 +67,7 @@ export default function LoginPage() {
       </div>
 
       {/* ── CARD PRINCIPAL ── */}
-      <div className="relative z-10 w-full max-w-[420px] mx-4 p-10 bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] border border-white dark:border-slate-800 transition-all duration-500">
+      <div className="relative z-10 w-full max-w-[420px] mx-4 p-10 bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] border border-slate-200 dark:border-slate-800 transition-all duration-500">
         
         {/* Cabeçalho */}
         <div className="text-center mb-8">
