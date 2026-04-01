@@ -3,13 +3,6 @@ import api from '../services/api.js'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import { GripVertical, Plus, Save, Trash2, Edit2, X } from 'lucide-react'
 
-// Utilidade de reordenação local
-const reorder = (list, startIndex, endIndex) => {
-  const result = Array.from(list)
-  const [removed] = result.splice(startIndex, 1)
-  result.splice(endIndex, 0, removed)
-  return result
-}
 
 export default function AdminHomePage() {
   const [links, setLinks] = useState([])
@@ -117,19 +110,15 @@ export default function AdminHomePage() {
   }
 
   // ============== CRUD Genérico ==============
-  const handleAddNew = async (type) => {
-    try {
-      if (type === 'links') {
-        const res = await api.post('/api/admin/home/links', { titulo: 'Novo Link', url: 'https://', icone_nome: 'Link' })
-        setLinks([...links, res.data])
-      } else if (type === 'avisos') {
-        const res = await api.post('/api/admin/home/avisos', { titulo: 'Novo Aviso', descricao_ou_imagem: 'Conteúdo do aviso' })
-        setAvisos([...avisos, res.data])
-      } else {
-        const res = await api.post('/api/admin/home/promocoes', { titulo: 'Nova Promoção', imagem_url: 'https://', url_destino: '' })
-        setPromocoes([...promocoes, res.data])
-      }
-    } catch { alert("Erro ao criar novo item") }
+  const openCreate = (type) => {
+    setEditingItem({ id: null, type })
+    if (type === 'links') {
+      setEditForm({ titulo: '', url: 'https://', icone_nome: 'Link', ativo: true, data_expiracao_input: '' })
+    } else if (type === 'avisos') {
+      setEditForm({ titulo: '', descricao_ou_imagem: '', ativo: true, data_expiracao_input: '' })
+    } else {
+      setEditForm({ titulo: '', imagem_url: '', url_destino: '', ativo: true, data_expiracao_input: '' })
+    }
   }
 
   const handleDelete = async (type, id) => {
@@ -171,7 +160,11 @@ export default function AdminHomePage() {
         payload.url_destino = editForm.url_destino
       }
 
-      await api.put(`/api/admin/home/${type}/${id}`, payload)
+      if (id === null) {
+        await api.post(`/api/admin/home/${type}`, payload)
+      } else {
+        await api.put(`/api/admin/home/${type}/${id}`, payload)
+      }
       setEditingItem(null)
       fetchData()
     } catch { alert("Erro ao salvar") }
@@ -248,8 +241,8 @@ export default function AdminHomePage() {
             Arraste os cards para o bloco da direita para ocultá-los do mural. Expirados pulam automaticamente.
           </p>
         </div>
-        <button 
-          onClick={() => handleAddNew(activeTab)} 
+        <button
+          onClick={() => openCreate(activeTab)}
           className="bg-drogamais-500 hover:bg-drogamais-600 text-white font-bold px-5 py-3 rounded-xl flex items-center gap-2 transition hover:scale-105 active:scale-95 shadow-lg shadow-drogamais-500/20"
         >
           <Plus size={18} strokeWidth={3} /> 
@@ -338,7 +331,7 @@ export default function AdminHomePage() {
           <div className="bg-white dark:bg-slate-900 rounded-[28px] w-full max-w-lg p-8 shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col gap-5">
             <div className="flex justify-between items-center border-b pb-4 border-slate-200 dark:border-slate-800">
               <h3 className="font-black text-[18px] text-slate-800 dark:text-white uppercase tracking-tight">
-                Editar {activeTab.toUpperCase()}
+                {editingItem?.id === null ? 'Novo' : 'Editar'} {editingItem?.type === 'links' ? 'SISTEMA' : editingItem?.type === 'promocoes' ? 'BANNER' : 'AVISO'}
               </h3>
               <button 
                 onClick={() => setEditingItem(null)} 
@@ -412,7 +405,7 @@ export default function AdminHomePage() {
                 onClick={saveEdit} 
                 className="bg-drogamais-500 hover:bg-drogamais-600 shadow-xl shadow-drogamais-500/20 text-white px-8 py-3 rounded-xl font-black text-sm uppercase tracking-wide flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
               >
-                <Save size={18} strokeWidth={3} /> Salvar Edição
+                <Save size={18} strokeWidth={3} /> {editingItem?.id === null ? 'Criar' : 'Salvar Edição'}
               </button>
             </div>
           </div>
