@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext.jsx'
 import {
   Home, Store, Users, Wrench, Settings, LogOut,
   Menu, X, Sun, Moon,
-  Mail, MapPin, Hash
+  Mail, MapPin, Hash, BarChart2
 } from 'lucide-react'
 import LogoDrogamais from '../assets/logo-login.svg'
 
@@ -41,7 +41,8 @@ export default function Layout() {
     { to: '/home',        label: 'Home',        icon: Home },
     { to: '/perfil',      label: 'Minha Loja',  icon: Store },
     { to: '/balconistas', label: 'Balconistas',  icon: Users },
-    { to: '/servicos',    label: 'Serviços',     icon: Wrench },
+    { to: '/servicos',    label: 'Serviços',     icon: Wrench   },
+    { to: '/campanhas',  label: 'Campanhas',    icon: BarChart2 },
   ]
   if (isAdmin) {
     navLinks.push({ to: '/admin/home', label: 'Admin', icon: Settings })

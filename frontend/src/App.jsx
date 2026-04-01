@@ -8,6 +8,7 @@ import AdminHomePage from './pages/AdminHomePage.jsx'
 import PerfilPage from './pages/PerfilPage.jsx'
 import BalconistasPage from './pages/BalconistasPage.jsx'
 import ServicosPage from './pages/ServicosPage.jsx'
+import CampanhasPage from './pages/CampanhasPage.jsx'
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/perfil"      element={<PerfilPage />} />
           <Route path="/balconistas" element={<BalconistasPage />} />
           <Route path="/servicos"    element={<ServicosPage />} />
+          <Route path="/campanhas"   element={<CampanhasPage />} />
         </Route>
 
         {/* Fallback */}
