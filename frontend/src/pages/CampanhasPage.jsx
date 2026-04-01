@@ -32,9 +32,20 @@ function formatarPontos(valor) {
   return Number(valor).toLocaleString('pt-BR', { maximumFractionDigits: 0 })
 }
 
-function formatarMoeda(valor) {
-  if (valor == null) return '—'
-  return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+// Extrai "YYYY-MM" de um valor de data
+function extrairMes(valor) {
+  if (!valor) return null
+  const d = new Date(valor)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+
+// Converte "YYYY-MM" ou "YYYY-MM-DD" para label legível "Mar/2026"
+function labelMes(ym) {
+  if (!ym) return ym
+  const [ano, mes] = ym.split('-')
+  return new Date(Number(ano), Number(mes) - 1).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })
+    .replace('. de ', '/')
+    .replace(' de ', '/')
 }
 
 // ─── Medalhas ─────────────────────────────────────────────────────────────
@@ -107,7 +118,7 @@ function LoadingSkeleton() {
 
 // ─── Página Principal ──────────────────────────────────────────────────────
 export default function CampanhasPage() {
-  // ── Estado ──
+  // ── Estado principal ──
   const [campanhas,        setCampanhas]        = useState([])
   const [campanhaAtiva,    setCampanhaAtiva]    = useState(null)
   const [abaAtiva,         setAbaAtiva]         = useState('principal')
@@ -117,8 +128,18 @@ export default function CampanhasPage() {
   const [loadingCampanhas, setLoadingCampanhas] = useState(true)
   const [loadingDados,     setLoadingDados]     = useState(false)
   const [error,            setError]            = useState(null)
-  const [filtroColaborador, setFiltroColaborador] = useState('')
-  const [filtroMes,          setFiltroMes]        = useState('')
+
+  // ── Filtros: aba Principal ──
+  const [filtroLoja,         setFiltroLoja]         = useState('')
+  const [filtroColaborador,  setFiltroColaborador]  = useState('')
+  const [filtroMes,          setFiltroMes]          = useState('')
+
+  // ── Filtros: aba Vendas Detalhadas ──
+  const [filtroVendasMes,         setFiltroVendasMes]         = useState('')
+  const [filtroVendasData,        setFiltroVendasData]        = useState('')
+  const [filtroVendasColaborador, setFiltroVendasColaborador] = useState('')
+  const [filtroVendasLoja,        setFiltroVendasLoja]        = useState('')
+  const [filtroVendasProduto,     setFiltroVendasProduto]     = useState('')
 
   // ── Tema resolvido a partir do nome da campanha ──
   const tema = useMemo(() => resolverTema(campanhaAtiva?.nome), [campanhaAtiva?.nome])
@@ -137,13 +158,15 @@ export default function CampanhasPage() {
       .finally(() => setLoadingCampanhas(false))
   }, [])
 
-  // ── Buscar dados ao trocar campanha ──
+  // ── Buscar dados ao trocar campanha (reset de todos os filtros) ──
   useEffect(() => {
     if (!campanhaAtiva) return
     setLoadingDados(true)
     setError(null)
-    setFiltroColaborador('')
-    setFiltroMes('')
+    // Reset todos os filtros
+    setFiltroLoja(''); setFiltroColaborador(''); setFiltroMes('')
+    setFiltroVendasMes(''); setFiltroVendasData(''); setFiltroVendasColaborador('')
+    setFiltroVendasLoja(''); setFiltroVendasProduto('')
 
     Promise.all([
       api.get(`/api/campanhas/${campanhaAtiva.id}/ranking`),
@@ -159,45 +182,78 @@ export default function CampanhasPage() {
       .finally(() => setLoadingDados(false))
   }, [campanhaAtiva?.id])
 
-  // ── Opções de filtros ──
-  const colaboradorOptions = useMemo(() => {
-    const nomes = [...new Set(rankingData.ranking.map(r => r.nome_colaborador).filter(Boolean))].sort()
-    return nomes.map(n => ({ value: n, label: n }))
+  // ── Opções de filtros: Aba Principal ──
+  const lojaOptions = useMemo(() => {
+    const vals = [...new Set(rankingData.ranking.map(r => r.loja_completo).filter(Boolean))].sort()
+    return vals.map(v => ({ value: v, label: v }))
   }, [rankingData.ranking])
 
-  const mesOptions = useMemo(() => {
-    const meses = [...new Set(vendas.map(v => {
-      if (!v.data_venda) return null
-      const d = new Date(v.data_venda)
-      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    }).filter(Boolean))].sort()
-    return meses.map(m => {
-      const [ano, mes] = m.split('-')
-      const label = new Date(Number(ano), Number(mes) - 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
-      return { value: m, label: label.charAt(0).toUpperCase() + label.slice(1) }
-    })
+  const colaboradorOptions = useMemo(() => {
+    const vals = [...new Set(rankingData.ranking.map(r => r.nome_colaborador).filter(Boolean))].sort()
+    return vals.map(v => ({ value: v, label: v }))
+  }, [rankingData.ranking])
+
+  const mesRankingOptions = useMemo(() => {
+    const vals = [...new Set(rankingData.ranking.map(r => r.ano_mes_referencia).filter(Boolean))].sort()
+    return vals.map(v => ({ value: v, label: labelMes(v) }))
+  }, [rankingData.ranking])
+
+  // ── Opções de filtros: Aba Vendas ──
+  const vendasMesOptions = useMemo(() => {
+    const vals = [...new Set(vendas.map(v => extrairMes(v.data_venda)).filter(Boolean))].sort()
+    return vals.map(v => ({ value: v, label: labelMes(v) }))
   }, [vendas])
 
-  // ── Filtragem in-memory ──
+  const vendasDataOptions = useMemo(() => {
+    const vals = [...new Set(vendas.map(v => formatarData(v.data_venda)).filter(s => s !== '—'))].sort()
+    return vals.map(v => ({ value: v, label: v }))
+  }, [vendas])
+
+  const vendasColaboradorOptions = useMemo(() => {
+    const vals = [...new Set(vendas.map(v => v.nome_colaborador).filter(Boolean))].sort()
+    return vals.map(v => ({ value: v, label: v }))
+  }, [vendas])
+
+  const vendasLojaOptions = useMemo(() => {
+    const vals = [...new Set(vendas.map(v => v.nome_fantasia).filter(Boolean))].sort()
+    return vals.map(v => ({ value: v, label: v }))
+  }, [vendas])
+
+  const vendasProdutoOptions = useMemo(() => {
+    const vals = [...new Set(vendas.map(v => v.descricao_produto_campanha).filter(Boolean))].sort()
+    return vals.map(v => ({ value: v, label: v }))
+  }, [vendas])
+
+  // ── Filtragem in-memory: Ranking (top 10) ──
   const rankingFiltrado = useMemo(() => {
-    const rows = rankingData.ranking ?? []
-    if (!filtroColaborador) return rows
-    return rows.filter(r => r.nome_colaborador === filtroColaborador)
-  }, [rankingData.ranking, filtroColaborador])
+    return (rankingData.ranking ?? [])
+      .filter(r => !filtroLoja        || r.loja_completo    === filtroLoja)
+      .filter(r => !filtroColaborador || r.nome_colaborador === filtroColaborador)
+      .filter(r => !filtroMes         || r.ano_mes_referencia === filtroMes)
+      .slice(0, 10)
+  }, [rankingData.ranking, filtroLoja, filtroColaborador, filtroMes])
 
+  // ── Filtragem in-memory: Vendas Detalhadas (top 10) ──
   const vendasFiltradas = useMemo(() => {
-    return vendas.filter(v => {
-      if (filtroMes && v.data_venda) {
-        const d = new Date(v.data_venda)
-        const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-        if (ym !== filtroMes) return false
-      }
-      if (filtroColaborador && v.nome_colaborador !== filtroColaborador) return false
-      return true
-    })
-  }, [vendas, filtroMes, filtroColaborador])
+    return vendas
+      .filter(v => !filtroVendasMes         || extrairMes(v.data_venda) === filtroVendasMes)
+      .filter(v => !filtroVendasData        || formatarData(v.data_venda) === filtroVendasData)
+      .filter(v => !filtroVendasColaborador || v.nome_colaborador === filtroVendasColaborador)
+      .filter(v => !filtroVendasLoja        || v.nome_fantasia === filtroVendasLoja)
+      .filter(v => !filtroVendasProduto     || v.descricao_produto_campanha === filtroVendasProduto)
+      .slice(0, 10)
+  }, [vendas, filtroVendasMes, filtroVendasData, filtroVendasColaborador, filtroVendasLoja, filtroVendasProduto])
 
-  const temFiltros = filtroColaborador || filtroMes
+  const temFiltrosPrincipal = filtroLoja || filtroColaborador || filtroMes
+  const temFiltrosVendas    = filtroVendasMes || filtroVendasData || filtroVendasColaborador || filtroVendasLoja || filtroVendasProduto
+
+  function limparFiltrosPrincipal() {
+    setFiltroLoja(''); setFiltroColaborador(''); setFiltroMes('')
+  }
+  function limparFiltrosVendas() {
+    setFiltroVendasMes(''); setFiltroVendasData(''); setFiltroVendasColaborador('')
+    setFiltroVendasLoja(''); setFiltroVendasProduto('')
+  }
 
   // ── Renderização ──
   if (loadingCampanhas) return (
@@ -287,46 +343,69 @@ export default function CampanhasPage() {
               <Filter size={13} /> Filtros
             </h2>
 
-            <SelectField
-              label="Colaborador"
-              value={filtroColaborador}
-              onChange={setFiltroColaborador}
-              options={colaboradorOptions}
-              placeholder="Todos"
-            />
+            {/* ─ Filtros da aba Principal ─ */}
+            {abaAtiva === 'principal' && (
+              <>
+                <SelectField label="Loja" value={filtroLoja} onChange={setFiltroLoja} options={lojaOptions} />
+                <SelectField label="Colaborador" value={filtroColaborador} onChange={setFiltroColaborador} options={colaboradorOptions} />
+                <SelectField label="Mês" value={filtroMes} onChange={setFiltroMes} options={mesRankingOptions} />
 
-            <SelectField
-              label="Mês"
-              value={filtroMes}
-              onChange={setFiltroMes}
-              options={mesOptions}
-              placeholder="Todos"
-            />
+                {temFiltrosPrincipal && (
+                  <button
+                    onClick={limparFiltrosPrincipal}
+                    className="w-full py-2 text-[11px] font-black uppercase text-slate-400
+                               hover:text-red-500 dark:hover:text-red-400 transition-colors
+                               flex items-center justify-center gap-1.5"
+                  >
+                    <X size={12} /> Limpar filtros
+                  </button>
+                )}
 
-            {temFiltros && (
-              <button
-                onClick={() => { setFiltroColaborador(''); setFiltroMes('') }}
-                className="w-full py-2 text-[11px] font-black uppercase text-slate-400
-                           hover:text-red-500 dark:hover:text-red-400 transition-colors
-                           flex items-center justify-center gap-1.5"
-              >
-                <X size={12} /> Limpar filtros
-              </button>
+                {/* CAT da loja logada */}
+                {rankingData.catFiltro && (
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1">
+                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Categoria (CAT)</p>
+                    <p
+                      className="text-xs font-black px-2 py-1 rounded-lg inline-block"
+                      style={{ backgroundColor: tema.corSecundaria, color: tema.corTexto }}
+                    >
+                      {rankingData.catFiltro}
+                    </p>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      Apenas lojas desta categoria são exibidas no ranking.
+                    </p>
+                  </div>
+                )}
+              </>
             )}
 
-            {rankingData.catFiltro && (
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1">
-                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Sua categoria</p>
-                <p
-                  className="text-xs font-black px-2 py-1 rounded-lg inline-block"
-                  style={{ backgroundColor: tema.corSecundaria, color: tema.corTexto }}
-                >
-                  {rankingData.catFiltro}
-                </p>
-                <p className="text-[10px] text-slate-400 mt-1">
-                  Apenas lojas desta categoria são exibidas no ranking.
-                </p>
-              </div>
+            {/* ─ Filtros da aba Vendas Detalhadas ─ */}
+            {abaAtiva === 'vendas' && (
+              <>
+                <SelectField label="Mês" value={filtroVendasMes} onChange={setFiltroVendasMes} options={vendasMesOptions} />
+                <SelectField label="Data" value={filtroVendasData} onChange={setFiltroVendasData} options={vendasDataOptions} />
+                <SelectField label="Colaborador" value={filtroVendasColaborador} onChange={setFiltroVendasColaborador} options={vendasColaboradorOptions} />
+                <SelectField label="Loja" value={filtroVendasLoja} onChange={setFiltroVendasLoja} options={vendasLojaOptions} />
+                <SelectField label="Produto" value={filtroVendasProduto} onChange={setFiltroVendasProduto} options={vendasProdutoOptions} />
+
+                {temFiltrosVendas && (
+                  <button
+                    onClick={limparFiltrosVendas}
+                    className="w-full py-2 text-[11px] font-black uppercase text-slate-400
+                               hover:text-red-500 dark:hover:text-red-400 transition-colors
+                               flex items-center justify-center gap-1.5"
+                  >
+                    <X size={12} /> Limpar filtros
+                  </button>
+                )}
+              </>
+            )}
+
+            {/* ─ Aba Produtos: sem filtros ─ */}
+            {abaAtiva === 'produtos' && (
+              <p className="text-[11px] text-slate-400 text-center py-2">
+                Nenhum filtro disponível.
+              </p>
             )}
           </div>
         </aside>
@@ -339,7 +418,7 @@ export default function CampanhasPage() {
                           bg-white dark:bg-slate-900 rounded-t-2xl overflow-hidden">
             {[
               { id: 'principal', label: 'Principal',          Icon: Trophy     },
-              { id: 'vendas',    label: 'Vendas Gerais',       Icon: TrendingUp },
+              { id: 'vendas',    label: 'Vendas Detalhadas',   Icon: TrendingUp },
               { id: 'produtos',  label: 'Produtos Pontuáveis', Icon: Package    },
             ].map(tab => {
               const isActive = abaAtiva === tab.id
@@ -380,9 +459,10 @@ export default function CampanhasPage() {
             </div>
           ) : (
             <>
-              {/* ─── ABA: Principal (Ranking) ─── */}
+              {/* ─── ABA: Principal (Ranking Top 10) ─── */}
               {abaAtiva === 'principal' && (
                 <div className="space-y-4">
+                  {/* Podium top 3 */}
                   {rankingFiltrado.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       {rankingFiltrado.slice(0, 3).map((entry, i) => {
@@ -414,13 +494,13 @@ export default function CampanhasPage() {
                               {entry.nome_colaborador || '—'}
                             </p>
                             <div className="flex items-center justify-between mt-2">
-                              <span className="text-[11px] text-slate-400 font-mono">
-                                {entry.cnpj_loja ?? '—'}
+                              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold truncate max-w-[130px]">
+                                {entry.nome_fantasia || entry.cnpj_loja || '—'}
                               </span>
                               {entry.e_minha_loja && (
                                 <span
                                   style={{ backgroundColor: cor }}
-                                  className="text-[9px] font-black text-white px-2 py-0.5 rounded-full"
+                                  className="text-[9px] font-black text-white px-2 py-0.5 rounded-full shrink-0"
                                 >
                                   SUA LOJA
                                 </span>
@@ -432,15 +512,16 @@ export default function CampanhasPage() {
                     </div>
                   )}
 
+                  {/* Tabela posições 4–10 */}
                   {rankingFiltrado.length === 0 ? (
                     <EstadoVazio mensagem="Nenhum resultado encontrado para os filtros aplicados." />
-                  ) : (
+                  ) : rankingFiltrado.length <= 3 ? null : (
                     <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card">
                       <table className="w-full text-sm">
                         <ThemedThead cor={cor} colunas={[
                           { label: 'Pos.',        align: 'center' },
                           { label: 'Colaborador', align: 'left'   },
-                          { label: 'CNPJ Loja',   align: 'left'   },
+                          { label: 'Loja',        align: 'left'   },
                           { label: 'Pontos',      align: 'right'  },
                           { label: 'Período',     align: 'center' },
                         ]} />
@@ -454,13 +535,21 @@ export default function CampanhasPage() {
                               <td className="px-4 py-3 text-center tabular-nums font-black text-slate-500 w-12">
                                 {entry.posicao}
                               </td>
-                              <td className="px-4 py-3">
-                                <span className={`font-bold text-slate-800 dark:text-slate-100 ${entry.e_minha_loja ? 'font-black' : ''}`}>
-                                  {entry.nome_colaborador || '—'}
-                                </span>
+                              <td className="px-4 py-3 font-bold text-slate-800 dark:text-slate-100">
+                                {entry.nome_colaborador || '—'}
                               </td>
-                              <td className="px-4 py-3 font-mono text-xs text-slate-500">
-                                {entry.cnpj_loja ?? '—'}
+                              <td className="px-4 py-3 text-slate-600 dark:text-slate-300 max-w-[200px] truncate">
+                                <span title={entry.loja_completo ?? entry.nome_fantasia ?? entry.cnpj_loja}>
+                                  {entry.nome_fantasia || entry.cnpj_loja || '—'}
+                                </span>
+                                {entry.e_minha_loja && (
+                                  <span
+                                    style={{ backgroundColor: cor }}
+                                    className="ml-2 text-[9px] font-black text-white px-1.5 py-0.5 rounded-full"
+                                  >
+                                    SUA LOJA
+                                  </span>
+                                )}
                               </td>
                               <td className="px-4 py-3 text-right font-black tabular-nums text-slate-800 dark:text-slate-100">
                                 {formatarPontos(entry.total_pontos)}
@@ -478,7 +567,7 @@ export default function CampanhasPage() {
                 </div>
               )}
 
-              {/* ─── ABA: Vendas Gerais ─── */}
+              {/* ─── ABA: Vendas Detalhadas ─── */}
               {abaAtiva === 'vendas' && (
                 vendasFiltradas.length === 0 ? (
                   <EstadoVazio mensagem="Nenhuma venda encontrada para os filtros aplicados." />
@@ -486,14 +575,12 @@ export default function CampanhasPage() {
                   <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card">
                     <table className="w-full text-sm">
                       <ThemedThead cor={cor} colunas={[
-                        { label: 'Data',        align: 'left'   },
-                        { label: 'Colaborador', align: 'left'   },
-                        { label: 'Cargo',       align: 'left'   },
-                        { label: 'GTIN',        align: 'left'   },
-                        { label: 'Produto',     align: 'left'   },
-                        { label: 'Qtd.',        align: 'right'  },
-                        { label: 'Pontos',      align: 'right'  },
-                        { label: 'Valor Líq.',  align: 'right'  },
+                        { label: 'Data',         align: 'left'   },
+                        { label: 'Colaborador',  align: 'left'   },
+                        { label: 'Loja',         align: 'left'   },
+                        { label: 'Produto',      align: 'left'   },
+                        { label: 'Qtd.',         align: 'right'  },
+                        { label: 'Pontos',       align: 'right'  },
                       ]} />
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
                         {vendasFiltradas.map((v, i) => (
@@ -504,11 +591,8 @@ export default function CampanhasPage() {
                             <td className="px-4 py-3 font-bold text-slate-800 dark:text-slate-100">
                               {v.nome_colaborador || '—'}
                             </td>
-                            <td className="px-4 py-3 text-xs text-slate-500">
-                              {v.cargo_colaborador || '—'}
-                            </td>
-                            <td className="px-4 py-3 font-mono text-xs text-slate-400">
-                              {v.GTIN || '—'}
+                            <td className="px-4 py-3 text-slate-600 dark:text-slate-300 max-w-[160px] truncate">
+                              {v.nome_fantasia || '—'}
                             </td>
                             <td className="px-4 py-3 text-slate-700 dark:text-slate-200 max-w-[220px] truncate">
                               {v.descricao_produto_campanha || '—'}
@@ -518,9 +602,6 @@ export default function CampanhasPage() {
                             </td>
                             <td className="px-4 py-3 text-right tabular-nums font-bold text-slate-800 dark:text-slate-100">
                               {formatarPontos(v.pontos_campanha)}
-                            </td>
-                            <td className="px-4 py-3 text-right tabular-nums text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                              {formatarMoeda(v.valor_liquido_total)}
                             </td>
                           </tr>
                         ))}
@@ -564,13 +645,13 @@ export default function CampanhasPage() {
                               </span>
                             </td>
                             <td className="px-4 py-3 text-right tabular-nums text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                              {formatarMoeda(p.preco_normal)}
+                              {p.preco_normal != null ? Number(p.preco_normal).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—'}
                             </td>
                             <td className="px-4 py-3 text-right tabular-nums text-emerald-600 font-bold whitespace-nowrap">
-                              {formatarMoeda(p.preco_desconto)}
+                              {p.preco_desconto != null ? Number(p.preco_desconto).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—'}
                             </td>
                             <td className="px-4 py-3 text-right tabular-nums text-slate-600 dark:text-slate-300">
-                              {p.rebaixe != null ? formatarMoeda(p.rebaixe) : '—'}
+                              {p.rebaixe != null ? Number(p.rebaixe).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '—'}
                             </td>
                             <td className="px-4 py-3 text-right tabular-nums text-slate-600 dark:text-slate-300">
                               {p.qtd_limite ?? '—'}
