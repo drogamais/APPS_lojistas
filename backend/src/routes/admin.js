@@ -25,8 +25,9 @@ export async function adminRoutes(fastify) {
         cnpj: true,
         loja_numero: true,
       },
-      orderBy: { loja_completo: 'asc' },
+      orderBy: { loja_numero: 'asc' },
     })
+    return reply.send(lojas)
   })
 
   // GET /api/admin/sync/status
