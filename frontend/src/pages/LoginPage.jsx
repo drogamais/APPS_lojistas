@@ -1,9 +1,9 @@
 // src/pages/LoginPage.jsx
-import { useState, useId } from 'react'
+import { useState, useId, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import api from '../services/api.js'
-import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, AlertCircle, Sun, Moon } from 'lucide-react'
 import LogoDrogamais from '../assets/logo-login.svg'
 import BackgroundArt from '../components/BackgroundArt.jsx'
 
@@ -17,6 +17,21 @@ export default function LoginPage() {
   const [error, setError]       = useState('')
   const [loading, setLoading]   = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+
+  /* Dark Mode Logic */
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem('theme') === 'dark'
+  })
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark')
+      localStorage.setItem('theme', 'dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+      localStorage.setItem('theme', 'light')
+    }
+  }, [darkMode])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -35,13 +50,24 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative font-sans text-slate-900">
+    <div className="min-h-screen flex items-center justify-center relative font-sans text-slate-900 bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
       
       {/* Importa a arte de fundo limpa */}
       <BackgroundArt />
 
+      {/* Botão de Dark Mode (Topo Direito) */}
+      <div className="absolute top-6 right-6 z-20">
+        <button
+          onClick={() => setDarkMode(!darkMode)}
+          className="p-2.5 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-white dark:border-slate-800 text-slate-500 dark:text-yellow-400 shadow-xl shadow-slate-200/20 transition-all hover:scale-105 active:scale-95 group focus:outline-none focus:ring-2 focus:ring-drogamais-500/20"
+          title={darkMode ? "Ativar Modo Claro" : "Ativar Modo Escuro"}
+        >
+          {darkMode ? <Sun size={20} className="group-hover:rotate-45 transition-transform" /> : <Moon size={20} className="group-hover:-rotate-12 transition-transform" />}
+        </button>
+      </div>
+
       {/* ── CARD PRINCIPAL ── */}
-      <div className="relative z-10 w-full max-w-[420px] mx-4 p-10 bg-white/95 backdrop-blur-xl rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-white">
+      <div className="relative z-10 w-full max-w-[420px] mx-4 p-10 bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl rounded-[24px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] border border-white dark:border-slate-800 transition-all duration-500">
         
         {/* Cabeçalho */}
         <div className="text-center mb-8">
@@ -56,7 +82,7 @@ export default function LoginPage() {
           >
             DROGAMAIS
           </h1>
-          <p className="text-[13.5px] font-medium text-slate-500 mt-1">
+          <p className="text-[13.5px] font-medium text-slate-500 dark:text-slate-400 mt-1">
             Portal do Lojista
           </p>
           <div className="w-10 h-0.5 mx-auto mt-4 bg-gradient-to-r from-transparent via-drogamais-500/40 to-transparent rounded-full" />
@@ -67,7 +93,7 @@ export default function LoginPage() {
           
           {/* Campo E-mail */}
           <div>
-            <label htmlFor={emailId} className="block text-[12.5px] font-semibold text-slate-600 mb-2 uppercase tracking-wide">
+            <label htmlFor={emailId} className="block text-[12.5px] font-semibold text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wide">
               E-mail
             </label>
             <div className="relative group">
@@ -82,21 +108,16 @@ export default function LoginPage() {
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="seu@email.com"
-                className="w-full pl-11 pr-4 py-3 text-[14.5px] text-slate-800 bg-slate-50 border border-slate-200 shadow-sm rounded-xl outline-none transition-all hover:bg-slate-100 hover:border-slate-300 focus:bg-white focus:border-drogamais-500 focus:ring-4 focus:ring-drogamais-500/15 placeholder:text-slate-400"
+                className="w-full pl-11 pr-4 py-3 text-[14.5px] text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 shadow-sm rounded-xl outline-none transition-all hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 focus:bg-white dark:focus:bg-slate-900 focus:border-drogamais-500 dark:focus:border-drogamais-500 focus:ring-4 focus:ring-drogamais-500/15 dark:focus:ring-drogamais-500/10 placeholder:text-slate-400 dark:placeholder:text-slate-600"
               />
             </div>
           </div>
 
           {/* Campo Senha */}
           <div>
-            <div className="flex justify-between items-center mb-2">
-              <label htmlFor={senhaId} className="block text-[12.5px] font-semibold text-slate-600 uppercase tracking-wide">
-                Senha
-              </label>
-              <a href="#" className="text-[12.5px] font-medium text-slate-400 hover:text-drogamais-500 transition-colors">
-                Esqueceu a senha?
-              </a>
-            </div>
+            <label htmlFor={senhaId} className="block text-[12.5px] font-semibold text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wide">
+              Senha
+            </label>
             <div className="relative group">
               <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-drogamais-500 transition-colors">
                 <Lock size={18} />
@@ -109,7 +130,7 @@ export default function LoginPage() {
                 value={form.senha}
                 onChange={(e) => setForm({ ...form, senha: e.target.value })}
                 placeholder="••••••••"
-                className="w-full pl-11 pr-11 py-3 text-[14.5px] text-slate-800 bg-slate-50 border border-slate-200 shadow-sm rounded-xl outline-none transition-all hover:bg-slate-100 hover:border-slate-300 focus:bg-white focus:border-drogamais-500 focus:ring-4 focus:ring-drogamais-500/15 placeholder:text-slate-400"
+                className="w-full pl-11 pr-11 py-3 text-[14.5px] text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 shadow-sm rounded-xl outline-none transition-all hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 focus:bg-white dark:focus:bg-slate-900 focus:border-drogamais-500 dark:focus:border-drogamais-500 focus:ring-4 focus:ring-drogamais-500/15 dark:focus:ring-drogamais-500/10 placeholder:text-slate-400 dark:placeholder:text-slate-600"
               />
               <button
                 type="button"
@@ -118,6 +139,11 @@ export default function LoginPage() {
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
+            </div>
+            <div className="flex justify-end mt-2">
+              <a href="#" className="text-[12.5px] font-medium text-slate-400 dark:text-slate-500 hover:text-drogamais-500 dark:hover:text-drogamais-400 transition-colors">
+                Esqueceu a senha?
+              </a>
             </div>
           </div>
 
@@ -142,7 +168,7 @@ export default function LoginPage() {
         </form>
 
         {/* Rodapé do Card */}
-        <p className="text-center mt-8 text-[11.5px] text-slate-400 tracking-wide">
+        <p className="text-center mt-8 text-[11.5px] text-slate-400 dark:text-slate-500 tracking-wide">
           © {new Date().getFullYear()} Drogamais · Uso exclusivo de lojistas
         </p>
       </div>

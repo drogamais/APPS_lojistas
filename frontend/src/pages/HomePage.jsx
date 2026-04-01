@@ -126,6 +126,7 @@ function AvisosCarousel({ avisos }) {
 ═══════════════════════════════════════════════════════ */
 function PromocoesCarousel({ promocoes }) {
   const [current, setCurrent] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
   const timerRef = useRef(null)
   const total = promocoes.length
 
@@ -136,10 +137,10 @@ function PromocoesCarousel({ promocoes }) {
   }
 
   useEffect(() => {
-    if (total <= 1) return
+    if (total <= 1 || isPaused) return
     timerRef.current = setTimeout(next, 5500)
     return () => clearTimeout(timerRef.current)
-  }, [current, next, total])
+  }, [current, next, total, isPaused])
 
   if (total === 0) return null
 
@@ -167,7 +168,11 @@ function PromocoesCarousel({ promocoes }) {
 
   // Coverflow Interativo Dinâmico (Reduzido para 640x360 banner format)
   return (
-    <div className="relative w-full pt-2 pb-5 flex flex-col items-center overflow-x-hidden">
+    <div 
+      className="relative w-full pt-2 pb-5 flex flex-col items-center overflow-x-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       
       {/* Container das Imagens */}
       <div className="relative w-full max-w-5xl flex items-center justify-center 
